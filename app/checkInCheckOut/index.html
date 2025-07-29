@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Attendance</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Attendance Tracker</h1>
+        
+        <div class="status" id="status">Ready to check in</div>
+        
+        <button class="toggle-btn" id="toggleBtn">
+            Check In
+        </button>
+        
+        <div class="time-display">
+            <div class="time-row">
+                <span>Check In:</span>
+                <span id="checkInTime">--:--</span>
+            </div>
+            <div class="time-row">
+                <span>Check Out:</span>
+                <span id="checkOutTime">--:--</span>
+            </div>
+        </div>
+        
+        <div class="location-info" id="locationInfo" style="display: none;">
+            <strong>Location captured:</strong><br>
+            <span id="locationDetails"></span>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

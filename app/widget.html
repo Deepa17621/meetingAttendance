@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Header -->
+            <div class="header">
+                <h1>Attendance Tracker</h1>
+                <p class="subtitle">Location-based check-in/out system</p>
+            </div>
+
+            <!-- Status Indicator -->
+            <div class="status-indicator">
+                <div class="status-icon" id="statusIcon">✕</div>
+                <span class="status-text" id="statusText">Not Checked In</span>
+            </div>
+
+            <!-- Location Status -->
+            <div class="location-status" id="locationStatus" style="display: none;">
+                <div class="location-icon">📍</div>
+                <span id="locationText">Checking location...</span>
+            </div>
+
+            <!-- Time Records -->
+            <div class="time-records">
+                <div class="time-row">
+                    <div class="time-label">
+                        <span class="time-icon">🕐</span>
+                        <span>Check In:</span>
+                    </div>
+                    <span class="time-value" id="checkInTime">--:--</span>
+                </div>
+                
+                <div class="time-row">
+                    <div class="time-label">
+                        <span class="time-icon">🕐</span>
+                        <span>Check Out:</span>
+                    </div>
+                    <span class="time-value" id="checkOutTime">--:--</span>
+                </div>
+
+                <div class="duration-row" id="durationRow" style="display: none;">
+                    <span class="duration-label">Duration from <span id="meetingEndDisplay">17:00</span>:</span>
+                    <span class="duration-value" id="durationValue"></span>
+                </div>
+            </div>
+
+            <!-- Check In/Out Button -->
+            <button class="action-button" id="actionButton" onclick="handleButtonClick()">
+                Check In
+            </button>
+
+            <!-- Info -->
+            <div class="info">
+                <p>Must be within <span id="radiusDisplay">100</span>m radius to check in</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>   

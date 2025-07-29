@@ -1,0 +1,282 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: hsl(240, 10%, 3.9%);
+    color: hsl(0, 0%, 98%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 384px;
+}
+
+/* Card */
+.card {
+    background-color: hsl(240, 10%, 3.9%);
+    border: 1px solid hsl(240, 3.7%, 15.9%);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: hsl(0, 0%, 98%);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: hsl(240, 5%, 64.9%);
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.status-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: white;
+    background-color: hsl(240, 5%, 64.9%);
+    transition: all 0.3s ease;
+}
+
+.status-icon.checked-in {
+    background-color: hsl(142, 76%, 36%);
+}
+
+.status-text {
+    font-weight: 500;
+    color: hsl(240, 5%, 64.9%);
+    transition: color 0.3s ease;
+}
+
+.status-text.checked-in {
+    color: hsl(142, 76%, 36%);
+}
+
+/* Location Status */
+.location-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.location-icon {
+    color: hsl(142, 76%, 36%);
+}
+
+#locationText {
+    color: hsl(240, 5%, 64.9%);
+}
+
+/* Time Records */
+.time-records {
+    margin-bottom: 1.5rem;
+    border-top: 1px solid hsl(240, 3.7%, 15.9%);
+    padding-top: 1rem;
+}
+
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.time-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: hsl(240, 5%, 64.9%);
+}
+
+.time-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-value {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: hsl(0, 0%, 98%);
+}
+
+.duration-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid hsl(240, 3.7%, 15.9%);
+    margin-top: 0.75rem;
+}
+
+.duration-label {
+    font-size: 0.875rem;
+    color: hsl(240, 5%, 64.9%);
+}
+
+.duration-value {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(0, 0%, 98%);
+}
+
+/* Action Button */
+.action-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: hsl(142, 76%, 36%);
+    color: hsl(355, 25%, 95%);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.action-button:hover {
+    background-color: hsl(142, 76%, 32%);
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-button.check-out {
+    background-color: hsl(0, 84.2%, 60.2%);
+    color: hsl(0, 0%, 98%);
+}
+
+.action-button.check-out:hover {
+    background-color: hsl(0, 84.2%, 56%);
+}
+
+/* Info */
+.info {
+    text-align: center;
+}
+
+.info p {
+    font-size: 0.75rem;
+    color: hsl(240, 5%, 64.9%);
+}
+
+/* Toast System */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    max-width: 320px;
+}
+
+.toast {
+    background-color: hsl(240, 10%, 3.9%);
+    border: 1px solid hsl(240, 3.7%, 15.9%);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+.toast.success {
+    border-color: hsl(142, 76%, 36%);
+}
+
+.toast.error {
+    border-color: hsl(0, 84.2%, 60.2%);
+}
+
+.toast-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: hsl(0, 0%, 98%);
+}
+
+.toast.success .toast-title {
+    color: hsl(142, 76%, 36%);
+}
+
+.toast.error .toast-title {
+    color: hsl(0, 84.2%, 60.2%);
+}
+
+.toast-description {
+    font-size: 0.875rem;
+    color: hsl(240, 5%, 64.9%);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .toast-container {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+}
