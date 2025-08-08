@@ -8,56 +8,21 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://live.zwidgets.com/js-sdk/1.4/ZohoEmbededAppSDK.min.js"></script>
+    <script src="../translations/init.js" defer></script>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="header">
-                <h1 class="title">Checkout System</h1>
-                <p class="description">Click checkout to record your location and time</p>
+                <h1 id="title">Checkout System</h1>
             </div>
             
             <div class="content">
-                <div class="field">
-                    <label class="label">
-                        <span class="icon">📍</span>
-                        Checkout Location
-                    </label>
-                    <div class="display-field" id="checkoutLocation">
-                        Not checked out yet
-                    </div>
+                <div class="checkOutStatus">
+                      <span id="status">Status :</span><h4 class="actual-status" id=""></h4>
                 </div>
 
-                <div class="field">
-                    <label class="label">
-                        <span class="icon">🕒</span>
-                        Checkout Time
-                    </label>
-                    <div class="display-field" id="checkoutTime">
-                        Not checked out yet
-                    </div>
-                </div>
-
-                <div class="success-message" id="successMessage" style="display: none;">
-                    <div class="success-header">
-                        <span class="icon">✓</span>
-                        <span>Checkout Recorded:</span>
-                    </div>
-                    <div class="success-details">
-                        <div class="detail">
-                            <span class="icon">📍</span>
-                            <span id="successLocation"></span>
-                        </div>
-                        <div class="detail">
-                            <span class="icon">🕒</span>
-                            <span id="successTime"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="checkout-btn">
-                    Checkout Now
-                </button>
+                <button class="checkout-btn" id="button-pending">Checkout Now</button>
             </div>
         </div>
     </div>

@@ -1,1 +1,20 @@
-{}
+{
+  "title": "Checkout System",
+  "status": "Status : ",
+  "actual-status-check-out-pending": "Not Checked Out Yet",
+  "actual-status-success": "Checked Out Successfully!",
+  "actual-status-already-done": "Checked Out!",
+  "actual-status-check-in-pending": "Yet to Check In!",
+  "button-in-progress": "Checking out... ⏳",
+  "button-success": "Checked Out",
+  "button-pending": "Checkout Now",
+  "toast-checkout-success":"Checked Out Successfully!",
+  "toast-details-update-failed":"Failed to update checkout details. Please try again.",
+  "toast-reverse-geocode-failed":"📍 Failed to reverse location.",
+  "toast-unexpected-error":"Unexpected error occurred",
+  "toast-geolocation-not-supported":"🌐 Browser doesn’t support geolocation.",
+  "toast-meeting-not-ended":"🕒 Check-out is only available after the meeting ends.",
+  "toast-checkin-warning":"Please check in before checking out!",
+  "toast-already-checked-out":"Check-out already done.",
+  "toast-error-contact-support":"Unexpected error. Contact support."
+}
