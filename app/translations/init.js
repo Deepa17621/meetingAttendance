@@ -26,16 +26,48 @@ async function startTranslation(langObj) {
   (document.querySelector("#button-pending")).textContent = langObj["button-pending"];
 }
 
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "flex"; // or "block" depending on your CSS
+}
+
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
+
 async function main() {
+  showLoader();
   try {
     await ZOHO.embeddedApp.init();
-    let userDetails = await ZOHO.CRM.CONFIG.getCurrentUser();
-    let currentLang = await userDetails.users[0].locale;
-    let d = await getTranslatedObject(currentLang);
-    await startTranslation(d);
+
+    const userDetails = await ZOHO.CRM.CONFIG.getCurrentUser();
+    const currentLang = userDetails.users[0].locale;
+
+    (document.querySelector(".actual-status")).innerHTML= currentLang.startsWith("en") ? "Loading..." : "加载中...";
+
+    const translations = await getTranslatedObject(currentLang);
+
+    await startTranslation(translations);
+
   } catch (error) {
-    console.log(error);
-    
+    console.error("Error loading translations:", error);
+  } finally {
+    hideLoader(); // Hides loader once all data is ready
   }
 }
+
 main();
+
+
+// async function main() {
+//   try {
+//     await ZOHO.embeddedApp.init();
+//     let userDetails = await ZOHO.CRM.CONFIG.getCurrentUser();
+//     let currentLang = await userDetails.users[0].locale;
+//     let d = await getTranslatedObject(currentLang);
+//     await startTranslation(d);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+// main();

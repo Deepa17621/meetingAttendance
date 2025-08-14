@@ -3,36 +3,100 @@ let checkOutStatus = document.querySelector(".checkOutStatus");
 let statusSpan = document.querySelector("#status");
 let actualStatus = document.querySelector(".actual-status");
 
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "flex";
+}
+
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
+
+function dynamicContent(statusContent, btnContent, langObject) {
+  actualStatus.id = statusContent;
+  actualStatus.innerHTML = langObject[statusContent];
+  checkoutBtn.id = btnContent;
+  checkoutBtn.textContent = langObject[btnContent];
+}
+function calculateDistance(currentLocation, targetLocation) {
+  let lat1 = currentLocation.coords.latitude;
+  let lon1 = currentLocation.coords.longitude;
+  targetLocation = JSON.parse(targetLocation);
+
+  let lat2 = targetLocation.latitude;
+  let lon2 = targetLocation.longitude;
+
+  const R = 6371e3; // meters
+  const DEG_TO_RAD = Math.PI / 180;
+
+  const lat1Rad = lat1 * DEG_TO_RAD;
+  const lat2Rad = lat2 * DEG_TO_RAD;
+  const deltaLat = (lat2 - lat1) * DEG_TO_RAD;
+  const deltaLon = (lon2 - lon1) * DEG_TO_RAD;
+
+  const sinDeltaLat = Math.sin(deltaLat / 2);
+  const sinDeltaLon = Math.sin(deltaLon / 2);
+
+  const a = sinDeltaLat * sinDeltaLat +
+    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+    sinDeltaLon * sinDeltaLon;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
 
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
-  // 1. Get Meeting Record Details
-  let meetingRecordConfig = {
-    Entity: "Events",
-    approved: "both",
-    RecordID: data.EntityId[0],
-  };
+  showLoader();
+  let meetingDetails, currentUser, orgDetails, locale, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime;
+  try {
+    // await new Promise(r => setTimeout(r, 50));
 
-  let meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
-  let currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
-  let orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
-  let locale = await currentUser.users[0].locale;
+    currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
+    locale = await currentUser.users[0].locale;
 
-  let langObj;
+    if (locale.startsWith("en")) {
+      let res = await fetch("../translations/en.json");
+      langObj = await res.json();
+    }
+    else if (locale.startsWith("zh")) {
+      let res = await fetch("../translations/zh.json");
+      langObj = await res.json();
+    }
 
-  if(locale.startsWith("en")){
-    let res = await fetch("../translations/en.json");
-    langObj = await res.json();
+    // 1. Get Meeting Record Details
+    let meetingRecordConfig = {
+      Entity: "Events",
+      approved: "both",
+      RecordID: data.EntityId[0],
+    };
+
+    meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
+
+    orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
+
+    checkInStatus = meetingDetails.data[0].Check_In_Status;
+    checkOutTime = meetingDetails.data[0].meetingattendance__Checkout_Time;
+    checkInTime = meetingDetails.data[0].Check_In_Time;
+
+    givenLocation = meetingDetails.data[0].Venue;
+    endTime = meetingDetails.data[0].End_DateTime;
+
+    if (checkInStatus === "VISITED" && !checkOutTime) {
+      dynamicContent("actual-status-check-out-pending", "button-pending", langObj);
+    }
+    else if (checkInStatus === "PLANNED") {
+      dynamicContent("actual-status-check-in-pending", "button-pending", langObj);
+    }
+    else if (checkOutTime != null) {
+      dynamicContent("actual-status-already-done", "button-success", langObj);
+    }
+  } catch (error) {
+    console.log(error);
   }
-  else if(locale.startsWith("zh")){
-    let res = await fetch("../translations/zh.json");
-    langObj = await res.json();
+  finally {
+    hideLoader(); // Hides loader once all data is ready
   }
-
-  let checkInStatus = meetingDetails.data[0].Check_In_Status;
-  let checkOutTime = meetingDetails.data[0].meetingattendance__Checkout_Time;
-  let checkInTime = meetingDetails.data[0].Check_In_Time;
-  let givenLocation = meetingDetails.data[0].location;
-  let endTime = meetingDetails.data[0].End_DateTime;
 
   // 2. Detect Platform - from Where Button is Accessed.
   // let detectPlatform = function detectPlatform() {
@@ -48,137 +112,171 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
   // let platform = detectPlatform();
 
   // if (platform === "mobile") {
-    // 3. Check Checked In Or Not
-    if (checkInStatus === "VISITED" && !checkOutTime) {
+  // 3. Check Checked In Or Not
+  if (checkInStatus === "VISITED" && !checkOutTime) {
 
-      // i. Check out Button - Event Listener
-      actualStatus.id = "actual-status-check-out-pending";
-      actualStatus.innerHTML = langObj["actual-status-check-out-pending"];
-      checkoutBtn.id = "button-pending";
-      checkoutBtn.textContent = langObj["button-pending"];  
-
-      checkoutBtn.addEventListener("click", async (e) => {
+    checkoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
 
       const currentDate = new Date();
-      const time = currentDate.toLocaleString();
+      // const time = currentDate.toLocaleString();
       const endingTime = new Date(endTime);
-      
-      if(time > endingTime.toLocaleString()){
-      const originalText = checkoutBtn.innerHTML;
-      checkoutBtn.id = "button-in-progress"
-      checkoutBtn.textContent = langObj["button-in-progress"];
-      checkoutBtn.disabled = "true";
 
-      let formattedCheckOutTime = getCurrentTimeInIST(time, orgDetails.org[0].time_zone);
-      let durationTime = function durationsTime() {
-      const inTime = new Date(checkInTime);
-      const outTime = new Date(time);
+      if (currentDate > endingTime) {
+        const originalText = checkoutBtn.innerHTML;
+        checkoutBtn.id = "button-in-progress"
+        checkoutBtn.textContent = langObj["button-in-progress"];
+        checkoutBtn.disabled = "true";
 
-      const duration = outTime - inTime;
+        let formattedCheckOutTime = getCurrentTimeInIST(currentDate, orgDetails.org[0].time_zone);
+        let durationTime = function durationsTime() {
+          const inTime = new Date(checkInTime);
+          const outTime = new Date(currentDate);
 
-        const inSeconds = duration / 1000;
-        const inMinutes = Math.floor(inSeconds / 60);
-        const hours = Math.floor(duration / (1000 * 60 * 60));
-        const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+          const duration = outTime - inTime;
 
-        if (inMinutes >= 60) {
-          return `${hours} hours ${minutes} minutes`;
-        } else if(inMinutes>0 && inMinutes <60){
-          return `${inMinutes} minutes`;
+          const inSeconds = duration / 1000;
+
+          const inMinutes = Math.floor(inSeconds / 60);
+          const hours = Math.floor(duration / (1000 * 60 * 60));
+          const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+
+          if (inMinutes >= 60) {
+            return `${hours} hours ${minutes} minutes`;
+          } else if (inMinutes > 0 && inMinutes < 60) {
+            return `${inMinutes} minutes`;
+          }
+          else {
+            return `${inSeconds} seconds`;
+          }
         }
-        else{
-          return `${inSeconds} seconds`;
+
+        let duration = durationTime();
+        var req_data = {
+          "arguments": JSON.stringify({
+            "location": givenLocation
+          })
+        };
+
+        let func_name = "meetingattendance__getlocation";
+        let geoCode_OfGivenLocation = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async function (position) {
+            try {
+              if (!givenLocation) {
+                let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+                console.log(reverseLocation);
+                if (reverseLocation !== false) {
+                  let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
+                  console.log(updateRecord);
+
+                  checkOutStatus.classList.add("out");
+                  checkoutBtn.disabled = "true";
+                  checkoutBtn.id = "button-success";
+                  checkoutBtn.textContent = langObj["button-success"];
+                  checkoutBtn.style.cursor = "not-allowed";
+
+                  if (updateRecord) {
+                    actualStatus.id = "actual-status-success";
+                    actualStatus.innerHTML = langObj["actual-status-success"];
+                    showToast(langObj["toast-checkout-success"], "green");
+                    setTimeout(async () => {
+                      await ZOHO.CRM.UI.Popup.close();
+                    }, 4000);
+                  } else {
+                    showToast(langObj["toast-details-update-failed"], "red");
+                    showError();
+                  }
+                } else {
+                  showToast(langObj["toast-reverse-geocode-failed"], "red");
+                  showError();
+                }
+              }
+              else if (givenLocation) {
+                if (JSON.parse(geoCode_OfGivenLocation.details.output).status === "success") {
+                  let distance = calculateDistance(position, geoCode_OfGivenLocation.details.output);
+                  if (distance <= 200) {
+                    let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+                    console.log(reverseLocation);
+                    if (reverseLocation !== false) {
+                      let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
+                      console.log(updateRecord);
+
+                      checkOutStatus.classList.add("out");
+                      checkoutBtn.disabled = "true";
+                      checkoutBtn.id = "button-success";
+                      checkoutBtn.textContent = langObj["button-success"];
+                      checkoutBtn.style.cursor = "not-allowed";
+
+                      if (updateRecord) {
+                        actualStatus.id = "actual-status-success";
+                        actualStatus.innerHTML = langObj["actual-status-success"];
+                        showToast(langObj["toast-checkout-success"], "green");
+                        setTimeout(async () => {
+                          await ZOHO.CRM.UI.Popup.close();
+                        }, 4000);
+                      } else {
+                        showToast(langObj["toast-details-update-failed"], "red");
+                        showError();
+                      }
+                    } else {
+                      showToast(langObj["toast-reverse-geocode-failed"], "red");
+                      showError();
+                    }
+                  }
+                  else {
+                    showToast("Current Location is not in boundry", "red");
+                    showError();
+                  }
+                }
+                else {
+                  showToast(JSON.parse(geoCode_OfGivenLocation.details.output).error, "red");
+                }
+
+              }
+
+            } catch (err) {
+              console.error("Error during checkout:", err);
+              showToast(langObj["toast-unexpected-error"], "red");
+              showError();
+            } finally {
+              checkoutBtn.disabled = false;
+            }
+          });
+        } else {
+          checkoutBtn.innerHTML = originalText;
+          checkoutBtn.textContent = langObj["button-pending"]
+          checkoutBtn.disabled = "false";
+          showToast(langObj["toast-geolocation-not-supported"], "red");
+          showError();
         }
       }
-      let duration = durationTime();
-      console.log(duration);
-      
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async function (position) {
-          try {
-            let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-            console.log(reverseLocation);
-            // Check the Distance between given Location and current Location
-            let latLongGivenLocation = await meetingattendance__getlocation(givenLocation);
-            
-            console.log(latLongGivenLocation);
-            let arunaMahal = await reverseGeocode(latLongGivenLocation.lat, latLongGivenLocation.lon);
-            console.log(arunaMahal);
-            
-            return;
-            //---------------------------------------------------------------
-            if (reverseLocation !== false) {
-              let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration);
-              console.log(updateRecord);
-              
-              checkOutStatus.classList.add("out");
-              checkoutBtn.disabled = "true";
-              checkoutBtn.id = "button-success";
-              checkoutBtn.textContent = langObj["button-success"];
-              checkoutBtn.style.cursor = "not-allowed";
+      else {
+        showToast(langObj["toast-meeting-not-ended"], "#eed202");
+      }
 
-              if (updateRecord) {
-                actualStatus.id = "actual-status-success";
-                actualStatus.innerHTML = langObj["actual-status-success"];
-                showToast(langObj["toast-checkout-success"], "green");
-                setTimeout(async () => {
-                  await ZOHO.CRM.UI.Popup.close();
-                }, 4000);
-              } else {
-                showToast(langObj["toast-details-update-failed"], "red");
-                showError();
-              }
-            } else {
-              showToast(langObj["toast-reverse-geocode-failed"], "red");
-              showError();
-            }
-          } catch (err) {
-            console.error("Error during checkout:", err);
-            showToast(langObj["toast-unexpected-error"], "red");
-            showError();
-          } finally {
-            checkoutBtn.disabled = "false";
-          }
-        });
-  } else {
-    showToast(langObj["toast-geolocation-not-supported"], "red");
-    showError();
-    // Reset button here too
-    checkoutBtn.innerHTML = originalText;
-    checkoutBtn.textContent = langObj["button-pending"]
-    checkoutBtn.disabled = "false";
+    });
   }
-}
-else{
-    showToast(langObj["toast-meeting-not-ended"], "#eed202");
-}
+  else if (checkInStatus === "PLANNED") {
+    checkOutStatus.classList.add("error");
+    showToast(langObj["toast-checkin-warning"], "#eed202");
+    showError();
+    return;
+  } else if (checkOutTime != null) {
 
-});
-    } else if (checkInStatus === "PLANNED") {
-      checkOutStatus.classList.add("error");
-      actualStatus.id = "actual-status-check-in-pending";
-      actualStatus.innerHTML = langObj["actual-status-check-in-pending"];
-      showToast(langObj["toast-checkin-warning"], "#eed202");
-      showError();
-      return;
-    } else if (checkOutTime != null) {
-      showToast(langObj["toast-already-checked-out"], "red");
-      checkOutStatus.classList.add("out");
-      actualStatus.id = "actual-status-already-done";
-      actualStatus.innerHTML = langObj["actual-status-already-done"];
-      checkoutBtn.disabled = "true";
-      checkoutBtn.style.cursor = "not-allowed";
-      checkoutBtn.id = "button-success";
-      checkoutBtn.innerHTML = langObj["button-success"];
-      let t = new Date(checkOutTime);
-      showError();
-      return;
-    } else {
-      showToast(langObj["toast-error-contact-support"], "red");
-      showError();
-      return;
-    }
+    showToast(langObj["toast-already-checked-out"], "red");
+    checkOutStatus.classList.add("out");
+    checkoutBtn.disabled = true;
+    checkoutBtn.style.cursor = "not-allowed";
+    showError();
+    return;
+  }
+  else {
+    showToast(langObj["toast-error-contact-support"], "red");
+    showError();
+    return;
+  }
   // } else {
   //   showToast("This Button Action is allowed only in mobile app", "red");
   //   showError();
@@ -189,40 +287,27 @@ function locationError(params) {
   showToast("Could not get location: " + params.message, "red");
 }
 
-//  async function getCoordinatesFromPlace(placeName) {
-//       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}`);
-//       const data = await response.json();
-//       if (data.length > 0) {
-//         return {
-//           lat: parseFloat(data[0].lat),
-//           lon: parseFloat(data[0].lon),
-//         };
-//       } else {
-//         throw new Error("Place not found");
-//       }
-//     }
+// function calculateDuration(time, checkInTime) {
+//   const inTime = new Date(checkInTime);
+//   const outTime = new Date(time);
 
-function calculateDuration(time, checkInTime) {
-  const inTime = new Date(checkInTime);
-  const outTime = new Date(time);
+//   const duration = outTime - inTime;
 
-  const duration = outTime - inTime;
+//   const inSeconds = duration / 1000;
+//   const inMinutes = Math.floor(inSeconds / 60);
+//   const hours = Math.floor(duration / (1000 * 60 * 60));
+//   const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
 
-  const inSeconds = duration / 1000;
-  const inMinutes = Math.floor(inSeconds / 60);
-  const hours = Math.floor(duration / (1000 * 60 * 60));
-  const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+//   if (inMinutes >= 60) {
+//     return `${hours} hours ${minutes} minutes`;
+//   } else if (inMinutes >= 1 && inMinutes < 60) {
+//     return `${inMinutes} minutes`;
+//   }
+//   else if (inMinutes <= 0) {
+//     return `${inSeconds} seconds`;
+//   }
 
-  if (inMinutes >= 60) {
-    return `${hours} hours ${minutes} minutes`;
-  } else if(inMinutes >=1 && inMinutes <60){
-    return `${inMinutes} minutes`;
-  }
-  else if(inMinutes<=0){
-    return `${inSeconds} seconds`;
-  }
-
-}
+// }
 
 async function reverseGeocode(lat, lng) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
@@ -237,12 +322,9 @@ async function reverseGeocode(lat, lng) {
   }
 }
 //Initializing the widget.
-ZOHO.embeddedApp.init();
+// ZOHO.embeddedApp.init();
 
-async function updateMeetingRecord(location,time,currentRecord,position,durationTime) {
-  let currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
-  console.log(currentUser.users[0]);
-  
+async function updateMeetingRecord(location, time, currentRecord, position, durationTime, currentUser) {
   let locationObjectKeys = Object.keys(location.address);
   let keys = locationObjectKeys.slice(0, 3);
   const matchingKeys = keys.filter((key) =>
@@ -317,6 +399,8 @@ async function updateMeetingRecord(location,time,currentRecord,position,duration
 
 function getCurrentTimeInIST(inp, tymZone) {
   const date = inp ? new Date(inp) : new Date();
+  console.log(date);
+
   const offSet = getUTCOffsetFromTimeZone(tymZone)
   const options = {
     timeZone: tymZone,
@@ -337,10 +421,9 @@ function getCurrentTimeInIST(inp, tymZone) {
 
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}${offSet}`;
 }
+
 function getUTCOffsetFromTimeZone(timeZone) {
   const date = new Date();
-
-  // Use the DateTimeFormat API to get the local time in the target timeZone
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hourCycle: "h23",

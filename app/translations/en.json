@@ -8,6 +8,7 @@
   "button-in-progress": "Checking out... ⏳",
   "button-success": "Checked Out",
   "button-pending": "Checkout Now",
+  "status-loading":"Loading...",
   "toast-checkout-success":"Checked Out Successfully!",
   "toast-details-update-failed":"Failed to update checkout details. Please try again.",
   "toast-reverse-geocode-failed":"📍 Failed to reverse location.",
