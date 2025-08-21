@@ -200,7 +200,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
               else if (givenLocation) {
                 if (JSON.parse(geoCode_OfGivenLocation.details.output).status === "success") {
                   let distance = calculateDistance(position, geoCode_OfGivenLocation.details.output);
-                  if (distance <= 200) {
+                  if (distance <= 2000) {
                     let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
                     
                     if (reverseLocation !== false) {
