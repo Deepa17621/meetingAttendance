@@ -13,11 +13,14 @@ function hideLoader() {
 }
 
 function dynamicContent(statusContent, btnContent, langObject) {
+  checkoutBtn.disabled = false;
+  checkoutBtn.style.cursor = "pointer";
   actualStatus.id = statusContent;
   actualStatus.innerHTML = langObject[statusContent];
   checkoutBtn.id = btnContent;
   checkoutBtn.textContent = langObject[btnContent];
 }
+
 function calculateDistance(currentLocation, targetLocation) {
   let lat1 = currentLocation.coords.latitude;
   let lon1 = currentLocation.coords.longitude;
@@ -42,16 +45,17 @@ function calculateDistance(currentLocation, targetLocation) {
     sinDeltaLon * sinDeltaLon;
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
   return R * c;
 }
 
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
   showLoader();
+  checkoutBtn.disabled = true;
+  checkoutBtn.style.cursor = "not-allowed";
   let meetingDetails, currentUser, orgDetails, locale, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime;
   try {
-    // await new Promise(r => setTimeout(r, 50));
-
+    await new Promise(r => setTimeout(r, 50));
+    
     currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
     locale = await currentUser.users[0].locale;
 
@@ -96,6 +100,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
   }
   finally {
     hideLoader(); // Hides loader once all data is ready
+    
   }
 
   // 2. Detect Platform - from Where Button is Accessed.
@@ -117,7 +122,8 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
     checkoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-
+      console.log("Clicked");
+      
       const currentDate = new Date();
       // const time = currentDate.toLocaleString();
       const endingTime = new Date(endTime);
@@ -166,10 +172,8 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             try {
               if (!givenLocation) {
                 let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-                console.log(reverseLocation);
                 if (reverseLocation !== false) {
                   let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
-                  console.log(updateRecord);
 
                   checkOutStatus.classList.add("out");
                   checkoutBtn.disabled = "true";
@@ -198,11 +202,10 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                   let distance = calculateDistance(position, geoCode_OfGivenLocation.details.output);
                   if (distance <= 200) {
                     let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-                    console.log(reverseLocation);
+                    
                     if (reverseLocation !== false) {
                       let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
-                      console.log(updateRecord);
-
+                      
                       checkOutStatus.classList.add("out");
                       checkoutBtn.disabled = "true";
                       checkoutBtn.id = "button-success";
@@ -254,6 +257,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
       }
       else {
         showToast(langObj["toast-meeting-not-ended"], "#eed202");
+        showError();
       }
 
     });
@@ -381,6 +385,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
   let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
   let notesContent = "Checked Out @" + location.display_name;
+
   var notesConfig = {
     Entity: "Notes",
     APIData: {
@@ -391,6 +396,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     },
     Trigger: ["workflow"],
   };
+
   let notesRes = await ZOHO.CRM.API.insertRecord(notesConfig);
   if (notesRes.data[0].code === "SUCCESS" && res.data[0].code === "SUCCESS") {
     return true;
@@ -399,7 +405,6 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
 
 function getCurrentTimeInIST(inp, tymZone) {
   const date = inp ? new Date(inp) : new Date();
-  console.log(date);
 
   const offSet = getUTCOffsetFromTimeZone(tymZone)
   const options = {
@@ -470,7 +475,7 @@ function showToast(message, color) {
 }
 
 function showError() {
-  checkoutBtn.disabled = "true";
+  checkoutBtn.disabled = true;
   checkoutBtn.style.cursor = "not-allowed";
   setTimeout(async () => {
     await ZOHO.CRM.UI.Popup.close();
