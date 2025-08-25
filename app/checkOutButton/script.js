@@ -362,26 +362,6 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     Trigger: ["workflow"],
   };
 
-  // CRM FIELDS
-  // var config = {
-  //   Entity: "Events",
-  //   APIData: {
-  //     id: currentRecord.EntityId[0],
-  //     Checkout_city: city,
-  //     Checkout_Country: location.address.country,
-  //     Checkout_State: location.address.state,
-  //     Checkout_Address: location.display_name,
-  //     Checkout_Latitude: position.coords.latitude.toString(),
-  //     Checkout_Longitude: position.coords.longitude.toString(),
-  //     Checkout_Zipcode: location.address.postcode,
-  //     Checkout_Time: time.toString(),
-  //     Checkout_Sub_Locality: subLocality,
-  //     Meeting_Duration: durationTime,
-  //     Checkout_By: currentUser.users[0].full_name,
-  //   },
-  //   Trigger: ["workflow"],
-  // };
-
   let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
   let notesContent = "Checked Out @" + location.display_name;

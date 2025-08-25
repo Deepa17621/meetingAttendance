@@ -1,12 +1,12 @@
 async function getTranslatedObject(locale) {
-  let langObj = async()=>{
-    if(locale.startsWith("en")){    
+  let langObj = async () => {
+    if (locale.startsWith("en")) {
       let res = await fetch("../translations/en.json");
       let data = await res.json();
       return data;
     }
-    else if(locale.startsWith("zh")){
-      let res = await fetch("../translations/zh.json");      
+    else if (locale.startsWith("zh")) {
+      let res = await fetch("../translations/zh.json");
       let data = await res.json();
       return data;
     }
@@ -15,8 +15,8 @@ async function getTranslatedObject(locale) {
 }
 
 async function startTranslation(langObj) {
-  (document.querySelector("#title")).innerHTML = langObj["title"];
-  (document.querySelector("#status")).innerHTML = langObj["status"];
+  (document.querySelector("#title")).textContent = langObj["title"];
+  (document.querySelector("#status")).textContent = langObj["status"];
   // (document.querySelector("#actual-status-check-out-pending")).innerHTML = langObj["actual-status-check-out-pending"];
   // (document.querySelector("#actual-status-success")).innerHTML = langObj["actual-status-success"];
   // (document.querySelector("#actual-status-already-done")).innerHTML = langObj["actual-status-already-done"];
@@ -24,6 +24,20 @@ async function startTranslation(langObj) {
   // (document.querySelector("#button-in-progress")).innerHTML = langObj["button-in-progress"];
   // (document.querySelector("#button-success")).innerHTML = langObj["button-success"];
   (document.querySelector("#button-pending")).textContent = langObj["button-pending"];
+
+  
+  console.log(stageText);
+  console.log(detailsRow);
+  
+  stageText.forEach(stage => {
+    stage.textContent = langObj[stage.id];
+  });
+  detailsRow.forEach(row => {
+    let firstTd = row.querySelector("td:first-child"); // pick only the first td
+    if (firstTd) {
+      firstTd.textContent = langObj[firstTd.id]; // change text
+    }
+  });
 }
 
 function showLoader() {
@@ -42,20 +56,13 @@ async function main() {
 
     const userDetails = await ZOHO.CRM.CONFIG.getCurrentUser();
     const currentLang = userDetails.users[0].locale;
-
-    (document.querySelector(".actual-status")).innerHTML= currentLang.startsWith("en") ? "Loading..." : "加载中...";
-
     const translations = await getTranslatedObject(currentLang);
-
     await startTranslation(translations);
-
+    hideLoader();
   } catch (error) {
-    console.error("Error loading translations:", error);
-  } finally {
-    hideLoader(); // Hides loader once all data is ready
+    console.log("Error loading translations:", error);
   }
 }
-
 main();
 
 

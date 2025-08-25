@@ -1,10 +1,10 @@
 {
-  "title": "结帐系统",
+  "title": "出席 CRM 会议",
   "status": "状态：",
-  "actual-status-check-out-pending": "尚未签出",
+  "actual-status-check-out-pending": "已签到",
   "actual-status-success": "已成功签出！",
   "actual-status-already-done": "已签出！",
-  "actual-status-check-in-pending": "尚未签到！",
+  "actual-status-check-in-pending": "尚未入住！",
   "button-in-progress": "正在签出... ⏳",
   "button-success": "已签出",
   "button-pending": "立即签出",
@@ -17,5 +17,13 @@
   "toast-meeting-not-ended": "🕒 会议尚未结束，暂无法签出。",
   "toast-checkin-warning": "请先签到再签出！",
   "toast-already-checked-out": "已完成签出。",
-  "toast-error-contact-support": "发生意外错误。请联系支持。"
+  "toast-error-contact-support": "发生意外错误。请联系支持。",
+  "detail-title": "会议标题",
+  "detail-time": "会议时间",
+  "detail-venue": "会议地点",
+  "detail-InTime": "签到时间",
+  "detail-OutTime": "签退时间",
+  "progress-check-In": "签到",
+  "progress-check-Out": "签退",
+  "progress-in-Meeting": "会议中"
 }

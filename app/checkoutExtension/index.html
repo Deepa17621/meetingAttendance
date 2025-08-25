@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://live.zwidgets.com/js-sdk/1.4/ZohoEmbededAppSDK.min.js"></script>
+    <script src="../translations/init.js" defer></script>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+    <main class="wrapper">
+        <header class="check-out-header row" id="title">Attendance For CRM Meetings</header>
+        <div class="meeting-status row">
+            <span class="status"></span>
+        </div>
+        <div class="status-stage-bar row">
+            <div class="status-wrapper">
+                <span class="progress-pending progress-circle"><i class="fa-solid fa-check fa-2xs"></i></span>
+                <span class="progress-line"></span>
+                <span class="progress-active progress-circle"><i class="fa-solid fa-xmark fa-2xs"></i></span>
+                <span class="progress-line"></span>
+                <span class="progress-success progress-circle"><i class="fa-solid fa-xmark fa-2xs"></i></span>
+            </div>
+            <div class="status-txt-wrapper">
+                <span class="pending-text txt" id="progress-check-In">Check-In</span>
+                <span class="active-text txt" id="progress-in-Meeting">In-Meeting</span>
+                <span class="success-text txt" id="progress-check-Out">Check-out</span>
+            </div>
+        </div>
+        <div class="meeting-details-container row">
+           <table>
+             <tr class="meeting-title-row detail-row">
+                <td class="title-key key-td" id="detail-title">Meeting Title</td>
+                <td class="colon1">:</td>
+                <td class="title-value"></td>
+            </tr>
+            <tr class="meeting-time-row detail-row">
+                <td class="time-key key-td" id="detail-time">Meeting Time</td>
+                <td class="colon1">:</td>
+                <td class="time-value"></td>
+            </tr>
+            <tr class="meeting-venue-row detail-row">
+                <td class="venue-key key-td" id="detail-venue">Meeting Venue</td>
+                <td class="colon1">:</td>
+                <td class="venue-value"></td>
+            </tr>
+            <tr class="meeting-checkIn-time-row detail-row">
+                <td class="checkIn-time-key key-td" id="detail-InTime">Check-In Time</td>
+                <td class="colon1">:</td>
+                <td class="checkIn-time-value"></td>
+            </tr>
+             <tr class="meeting-checkOut-time-row detail-row">
+                <td class="checkOut-time-key key-td" id="detail-OutTime">Check-Out Time</td>
+                <td class="colon1">:</td>
+                <td class="checkOut-time-value"></td>
+            </tr>
+           </table>
+        </div>
+        <div class="check-out-btn-container row">
+            <button class="check-out-btn">Check-out</button>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

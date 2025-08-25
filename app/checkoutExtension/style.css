@@ -1,0 +1,208 @@
+*{
+    padding: 0;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+body{
+    width: 97vw;
+    height: 95vh;
+}
+/* Loader overlay */
+#loader {
+  position: fixed;
+  inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0 */
+  background: rgba(255, 255, 255, 0.95);
+  /* display: flex;  */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Spinner style */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation for spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.wrapper{
+    width: 75%;
+    height: 98%;
+    border-radius: 2rem;
+    background-color: white;
+    margin: auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+}
+.row{
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    padding: 1rem 0.5rem;
+    width: 85%;
+    /* background-color: blue; */
+}
+.check-out-header{
+    font-size: large;
+}
+.meeting-status>.status{
+    font-weight: 600;
+    position: relative;
+    background: #007bff; /* badge color */
+    color: white;
+    padding: 10px 20px 10px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    display: inline-block;
+    clip-path: polygon(15px 0, 100% 0, 100% 100%, 15px 100%, 0 50%);
+}
+
+.status-wrapper, .status-txt-wrapper{
+   width: 92%;
+}
+.status-stage-bar{
+    display: flex;
+    flex-direction: column;
+}
+.status-txt-wrapper{
+    display: inline-flex;
+    width: 92%;
+    justify-content: space-between;
+
+}
+.progress-circle{
+    border: 1px solid black;
+    border-radius: 50%;
+    height: 1.3rem;
+    width: 1.3rem;
+    margin: 0 0.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.progress-line{
+    border: 1px solid black;
+    padding: 0.2rem;
+    background-color: grey;
+    border-radius: 0.2rem;
+    width: 10rem;
+    display: inline-flex;
+}
+/* Stage Colors */
+.progress-pending {
+  background-color: #9ca3af;
+  border-color: #9ca3af;
+}
+.txt{
+    margin-top: 0.5rem;
+}
+.progress-active {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  position: relative;
+}
+
+.progress-success {
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+/* Glow effect for active */
+.progress-active::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: var(--after-border, 2px solid transparent);
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  animation: var(--after-animation, none);;
+}
+
+@keyframes pulse {
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  70%  { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+.meeting-details-container{
+    border: 1px solid rgb(239, 238, 238);
+    border-radius: 1.5rem;
+    width: 90%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+.meeting-details-container>table, td, th {  
+  text-align: left;
+}
+
+.meeting-details-container>table {
+  border-collapse: collapse;
+  width: 97%;
+}
+/* .colon1{
+    text-align: center;
+} */
+.meeting-details-container>table, td {
+  padding: 0.4rem;
+}
+.key-td{
+    width: 7.5rem;
+    font-weight: 500;
+}
+.check-out-btn-container{
+    margin-top: 2rem;
+}
+.check-out-btn{
+    width: 100%;
+    padding: 0.8rem;
+    border-radius:0.8rem;
+    background-color: green;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.6s ease-in-out;
+    &:hover{
+        background-color: #2ec665;
+    }
+}
+.status.pending{
+    background-color: gray;
+    color: white;
+}
+.status.active{
+    background-color: green;
+    color: white;
+}
+.status.success{
+    background-color: red;
+    color: white;
+}
+
+.check-out-btn.pending{
+    background-color: grey;
+    cursor: not-allowed;
+    color: black;
+}
+.check-out-btn.active{
+    background-color: blue;
+    color: white;
+    cursor: pointer;
+}
+.check-out-btn.success{
+    background-color: green;
+    color: white;
+    cursor: not-allowed;
+}

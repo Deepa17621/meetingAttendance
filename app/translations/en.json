@@ -1,7 +1,7 @@
 {
-  "title": "Checkout System",
-  "status": "Status : ",
-  "actual-status-check-out-pending": "Not Checked Out Yet",
+  "title": "Attendance For CRM Meetings",
+  "status": "",
+  "actual-status-check-out-pending": "Checked-In",
   "actual-status-success": "Checked Out Successfully!",
   "actual-status-already-done": "Checked Out!",
   "actual-status-check-in-pending": "Yet to Check In!",
@@ -17,5 +17,13 @@
   "toast-meeting-not-ended":"🕒 Check-out is only available after the meeting ends.",
   "toast-checkin-warning":"Please check in before checking out!",
   "toast-already-checked-out":"Check-out already done.",
-  "toast-error-contact-support":"Unexpected error. Contact support."
+  "toast-error-contact-support":"Unexpected error. Contact support.",
+  "detail-title":"Meeting Title",
+  "detail-time":"Meeting Time",
+  "detail-venue":"Meeting Venue",
+  "detail-InTime":"Check-In Time",
+  "detail-OutTime":"Check-Out Time",
+  "progress-check-In":"Check-In",
+  "progress-check-Out":"Check-out",
+  "progress-in-Meeting":"In-Meeting"
 }

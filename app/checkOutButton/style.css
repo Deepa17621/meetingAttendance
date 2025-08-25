@@ -33,20 +33,17 @@ body {
   border: 5px solid #ddd;
   border-top: 5px solid #3498db;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 3s linear infinite;
 }
 
 /* Animation for spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
-
 .container {
     width: 100%;
     max-width: 400px;
 }
-
 .card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
