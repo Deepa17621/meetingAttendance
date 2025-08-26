@@ -293,7 +293,7 @@ td {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    /* gap: 10px; */
 }
 
 .progress-line {
@@ -302,5 +302,5 @@ td {
     height: 3px;
     background: rgb(113 122 243);
     border-radius: 0.2rem;
-    bottom: 7.5px;
+    bottom: 10px;
 }
