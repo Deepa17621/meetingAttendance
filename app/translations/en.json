@@ -1,5 +1,5 @@
 {
-  "title": "Attendance For CRM Meetings",
+  "title": "Meeting Check-out",
   "status": "",
   "actual-status-check-out-pending": "Checked-In",
   "actual-status-success": "Checked Out Successfully!",
@@ -25,5 +25,8 @@
   "detail-OutTime":"Check-Out Time",
   "progress-check-In":"Check-In",
   "progress-check-Out":"Check-out",
-  "progress-in-Meeting":"In-Meeting"
+  "progress-in-Meeting":"In-Meeting",
+  "loc-not-specified": "Location not specified",
+  "yet-to-check-out": "Not Checked Out",
+  "yet-to-check-in":"Not Checked In"
 }

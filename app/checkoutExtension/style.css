@@ -6,8 +6,10 @@
     font-weight: 600;
 }
 body{
-    width: 97vw;
-    height: 95vh;
+    width: 100vw;
+    height: 99vh;
+    display: flex;
+    justify-content: center;
 }
 /* Loader overlay */
 #loader {
@@ -36,12 +38,14 @@ body{
 }
 .wrapper{
     width: 75%;
-    height: 98%;
+    /* height: 95%; */
     border-radius: 2rem;
-    background-color: white;
+    background-color: rgb(236, 234, 234);
     margin: auto;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    padding: 2rem;
+    background-color: rgb(246 249 250 / 80%);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
 }
 .row{
     margin-bottom: 3rem;
@@ -49,8 +53,8 @@ body{
     justify-content: center;
     align-items: center;
     margin: auto;
-    padding: 1rem 0.5rem;
-    width: 85%;
+    padding: 1rem;
+    width: 90%;
     /* background-color: blue; */
 }
 .check-out-header{
@@ -65,24 +69,29 @@ body{
     font-size: 18px;
     font-weight: bold;
     display: inline-block;
-    clip-path: polygon(15px 0, 100% 0, 100% 100%, 15px 100%, 0 50%);
+    border-radius: 10px;
+    text-align: center;
+    /* clip-path: polygon(15px 0, 100% 0, 100% 100%, 15px 100%, 0 50%); */
 }
 
-.status-wrapper, .status-txt-wrapper{
+/* .status-wrapper, .status-txt-wrapper{
    width: 92%;
-}
-.status-stage-bar{
+} */
+ .status-stage-bar{
     display: flex;
     flex-direction: column;
+    align-items: center;
+    overflow-x: auto;
+    /* white-space: nowrap; */
 }
 .status-txt-wrapper{
     display: inline-flex;
-    width: 92%;
+    width: 90%;
     justify-content: space-between;
-
+    margin-top: 0.5rem;
 }
 .progress-circle{
-    border: 1px solid black;
+    border: 1px solid rgb(133, 128, 128);
     border-radius: 50%;
     height: 1.3rem;
     width: 1.3rem;
@@ -92,30 +101,30 @@ body{
     justify-content: center;
 }
 .progress-line{
-    border: 1px solid black;
-    padding: 0.2rem;
-    background-color: grey;
+    border: 1px solid rgb(113 122 243);
     border-radius: 0.2rem;
     width: 10rem;
     display: inline-flex;
-}
-/* Stage Colors */
-.progress-pending {
+} 
+/* Stage Colors  */
+ .progress-pending {
   background-color: #9ca3af;
   border-color: #9ca3af;
-}
+} 
 .txt{
     margin-top: 0.5rem;
 }
 .progress-active {
-  background-color: #2563eb;
-  border-color: #2563eb;
   position: relative;
 }
 
-.progress-success {
+.progress-circle.success {
   background-color: #16a34a;
   border-color: #16a34a;
+}
+.progress-circle.pending{
+    background-color: #9ca3af;
+    border-color: #9ca3af;
 }
 /* Glow effect for active */
 .progress-active::after {
@@ -129,7 +138,7 @@ body{
   border: var(--after-border, 2px solid transparent);
   transform: translate(-50%, -50%);
   opacity: 0.6;
-  animation: var(--after-animation, none);;
+  animation: var(--after-animation, none);
 }
 
 @keyframes pulse {
@@ -139,15 +148,24 @@ body{
 }
 
 .meeting-details-container{
-    border: 1px solid rgb(239, 238, 238);
     border-radius: 1.5rem;
-    width: 90%;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 95%;
+    border: 2px solid #d7d7e4;
+    background: #fafdff;
+    margin-top: 1.5rem;
+    overflow-x: auto;   /* enables horizontal scroll */
+    overflow-y: auto;   /* enables vertical scroll */
 }
 .meeting-details-container>table, td, th {  
   text-align: left;
 }
-
+.ellipsis-text {
+  width: 200px;            /* Set a fixed width */
+  white-space: nowrap;     /* Prevent text from wrapping */
+  overflow: hidden;        /* Hide the overflowing text */
+  text-overflow: ellipsis; /* Add "..." */
+  display: inline-block;   /* Needed in some cases */
+}
 .meeting-details-container>table {
   border-collapse: collapse;
   width: 97%;
@@ -159,14 +177,14 @@ body{
   padding: 0.4rem;
 }
 .key-td{
-    width: 7.5rem;
+    width: 8rem;
     font-weight: 500;
 }
 .check-out-btn-container{
     margin-top: 2rem;
 }
 .check-out-btn{
-    width: 100%;
+    min-width: 50%;
     padding: 0.8rem;
     border-radius:0.8rem;
     background-color: green;
@@ -174,9 +192,14 @@ body{
     border: none;
     cursor: pointer;
     transition: background-color 0.6s ease-in-out;
+    /* white-space: nowrap; */
+    text-align: center;
     &:hover{
         background-color: #2ec665;
     }
+}
+.check-out-btn.out{
+    display: none;
 }
 .status.pending{
     background-color: gray;
@@ -204,5 +227,4 @@ body{
 .check-out-btn.success{
     background-color: green;
     color: white;
-    cursor: not-allowed;
 }

@@ -1,5 +1,5 @@
 {
-  "title": "出席 CRM 会议",
+  "title": "会议退房",
   "status": "状态：",
   "actual-status-check-out-pending": "已签到",
   "actual-status-success": "已成功签出！",
@@ -8,7 +8,7 @@
   "button-in-progress": "正在签出... ⏳",
   "button-success": "已签出",
   "button-pending": "立即签出",
-  "status-loading":"加载中...",
+  "status-loading": "加载中...",
   "toast-checkout-success": "已成功签出！",
   "toast-details-update-failed": "无法更新签出详情。请重试。",
   "toast-reverse-geocode-failed": "📍 无法反向定位地址。",
@@ -25,5 +25,8 @@
   "detail-OutTime": "签退时间",
   "progress-check-In": "签到",
   "progress-check-Out": "签退",
-  "progress-in-Meeting": "会议中"
+  "progress-in-Meeting": "会议中",
+  "loc-not-specified": "未指定位置",
+  "yet-to-check-out": "未签出",
+  "yet-to-check-in": "未签入"
 }

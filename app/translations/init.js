@@ -16,28 +16,6 @@ async function getTranslatedObject(locale) {
 
 async function startTranslation(langObj) {
   (document.querySelector("#title")).textContent = langObj["title"];
-  (document.querySelector("#status")).textContent = langObj["status"];
-  // (document.querySelector("#actual-status-check-out-pending")).innerHTML = langObj["actual-status-check-out-pending"];
-  // (document.querySelector("#actual-status-success")).innerHTML = langObj["actual-status-success"];
-  // (document.querySelector("#actual-status-already-done")).innerHTML = langObj["actual-status-already-done"];
-  // (document.querySelector("#actual-status-check-in-pending")).innerHTML = langObj["actual-status-check-in-pending"];
-  // (document.querySelector("#button-in-progress")).innerHTML = langObj["button-in-progress"];
-  // (document.querySelector("#button-success")).innerHTML = langObj["button-success"];
-  (document.querySelector("#button-pending")).textContent = langObj["button-pending"];
-
-  
-  console.log(stageText);
-  console.log(detailsRow);
-  
-  stageText.forEach(stage => {
-    stage.textContent = langObj[stage.id];
-  });
-  detailsRow.forEach(row => {
-    let firstTd = row.querySelector("td:first-child"); // pick only the first td
-    if (firstTd) {
-      firstTd.textContent = langObj[firstTd.id]; // change text
-    }
-  });
 }
 
 function showLoader() {
@@ -57,7 +35,8 @@ async function main() {
     const userDetails = await ZOHO.CRM.CONFIG.getCurrentUser();
     const currentLang = userDetails.users[0].locale;
     const translations = await getTranslatedObject(currentLang);
-    await startTranslation(translations);
+    (document.querySelector("#title")).textContent = await translations["title"];
+    // await startTranslation(translations);
     hideLoader();
   } catch (error) {
     console.log("Error loading translations:", error);
