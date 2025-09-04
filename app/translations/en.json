@@ -17,6 +17,7 @@
   "toast-meeting-not-ended":"🕒 Check-out is only available after the meeting ends.",
   "toast-checkin-warning":"Please check in before checking out!",
   "toast-already-checked-out":"Check-out already done.",
+  "toast-location-not-in-boundry":"Current Location is not in boundary!",
   "toast-error-contact-support":"Unexpected error. Contact support.",
   "detail-title":"Meeting Title",
   "detail-time":"Meeting Time",
@@ -28,5 +29,8 @@
   "progress-in-Meeting":"In-Meeting",
   "loc-not-specified": "Location not specified",
   "yet-to-check-out": "Not Checked Out",
-  "yet-to-check-in":"Not Checked In"
+  "yet-to-check-in":"Not Checked In",
+  "btn-check-out-now":"Check-out now",
+  "AM":"AM",
+  "PM":"PM"
 }

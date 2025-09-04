@@ -80,7 +80,7 @@ function calculateDistance(currentLocation, targetLocation) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
-let meetingDetails, currentUser, orgDetails, locale, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime;
+let meetingDetails, currentUser, orgDetails, locale,locale_code, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime;
 
 // Page Load
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -91,8 +91,11 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         await new Promise(r => setTimeout(r, 150));
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
+        console.log(currentUser.users[0]);
+        
         locale = await currentUser.users[0].locale;
-
+        locale_code = await currentUser.users[0].locale_code;
+        
         if (locale.startsWith("en")) {
             let res = await fetch("../translations/en.json");
             langObj = await res.json();
@@ -122,14 +125,17 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
         orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
-
+        console.log(orgDetails);
+        
         checkInStatus = meetingDetails.data[0].Check_In_Status;
         checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
         checkInTime = meetingDetails.data[0].Check_In_Time;
 
         givenLocation = meetingDetails.data[0].Venue;
         endTime = meetingDetails.data[0].End_DateTime;
-
+        console.log(endTime+", "+meetingDetails.data[0].Start_DateTime);
+        console.log(meetingDetails.data[0]);
+        
         meeting_title.textContent = meetingDetails.data[0].Event_Title;
         meeting_time.textContent = formatDateRange(getTimeToDisplay(meetingDetails.data[0].Start_DateTime, orgDetails.org[0].time_zone), getTimeToDisplay(meetingDetails.data[0].End_DateTime, orgDetails.org[0].time_zone));
         meeting_venue.textContent = givenLocation ? givenLocation : langObj["loc-not-specified"];
@@ -230,7 +236,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                                         await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                                     }
                                     else {
-                                        showToast("Current Location is not in boundry", "red");
+                                        showToast(langObj["toast-location-not-in-boundry"], "red");
                                         btnBackToAction();
                                     }
                                 }
@@ -325,9 +331,8 @@ async function reverseGeocode(lat, lng) {
 }
 
 function formatDateRange(start, end) {
-    // Split into [date, time]
-    const [startDate, startTime] = start.split(", ");
-    const [endDate, endTime] = end.split(", ");
+    const [ startTime, startDate] = start.split(", ");
+    const [ endTime, endDate] = end.split(", ");
 
     if (startDate === endDate) {
         // Same date → merge
@@ -394,26 +399,37 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     } else return false;
 }
 function getTimeToDisplay(isoString, locale) {
-    const d = new Date(isoString);
-    
-    const options = {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    };
+  const d = new Date(isoString);
 
-    // India Time
-    const indiaTime = d.toLocaleString("en-IN", { ...options, timeZone: "Asia/Kolkata" });
+  // Force consistent parts (don’t let locale decide the order)
+  const options = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  };
 
-    // China Time
-    const chinaTime = d.toLocaleString("en-US", { ...options, timeZone: "Asia/Shanghai" });
-    console.log(indiaTime);
-    
-    return locale == "Asia/Kolkata" ? indiaTime : chinaTime;
+  // Format for given timezone
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    ...options,
+    timeZone: locale
+  });
+
+  const parts = formatter.formatToParts(d);
+
+  // Extract parts
+  const hour = parts.find(p => p.type === "hour").value;
+  const minute = parts.find(p => p.type === "minute").value;
+  const day = parts.find(p => p.type === "day").value;
+  const month = parts.find(p => p.type === "month").value;
+  const year = parts.find(p => p.type === "year").value;
+  const dayPeriod = parts.find(p => p.type === "dayPeriod").value.toUpperCase();
+
+  return `${hour}:${minute} ${langObj[dayPeriod]}, ${day}-${month}-${year}`;
 }
+
 function getUTCOffsetFromTimeZone(timeZone, date = new Date()) {
     const f = new Intl.DateTimeFormat("en-US", {
         timeZone,
@@ -492,7 +508,7 @@ function showToast(message, color) {
     // Create new toast and store reference
     activeToast = Toastify({
         text: message,
-        duration: 3000,
+        duration: 6000,
         gravity: "top",
         position: "center",
         backgroundColor: color,
@@ -502,8 +518,6 @@ function showToast(message, color) {
     activeToast.showToast();
 }
 
-
-
 function showError() {
     checkOutBtn.disabled = true;
     checkOutBtn.style.cursor = "not-allowed";
@@ -512,5 +526,5 @@ function showError() {
 function btnBackToAction() {
     checkOutBtn.disabled = false;
     checkOutBtn.style.cursor = "pointer";
-    checkOutBtn.textContent = "Check-out Now"
+    checkOutBtn.textContent = langObj["btn-check-out-now"];
 }

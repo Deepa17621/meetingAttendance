@@ -1,7 +1,7 @@
 {
-  "title": "会议退房",
+  "title": "会议退房", 
   "status": "状态：",
-  "actual-status-check-out-pending": "已签到",
+  "actual-status-check-out-pending": "已签到", 
   "actual-status-success": "已成功签出！",
   "actual-status-already-done": "已签出！",
   "actual-status-check-in-pending": "尚未入住！",
@@ -17,6 +17,7 @@
   "toast-meeting-not-ended": "🕒 会议尚未结束，暂无法签出。",
   "toast-checkin-warning": "请先签到再签出！",
   "toast-already-checked-out": "已完成签出。",
+  "toast-location-not-in-boundry": "当前位置不在边界内！",
   "toast-error-contact-support": "发生意外错误。请联系支持。",
   "detail-title": "会议标题",
   "detail-time": "会议时间",
@@ -28,5 +29,8 @@
   "progress-in-Meeting": "会议中",
   "loc-not-specified": "未指定位置",
   "yet-to-check-out": "未签出",
-  "yet-to-check-in": "未签入"
+  "yet-to-check-in": "未签入",
+  "btn-check-out-now": "立即退房" ,
+  "AM":"上午",
+  "PM":"下午"
 }
