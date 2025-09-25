@@ -91,7 +91,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         await new Promise(r => setTimeout(r, 150));
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
-        console.log(currentUser.users[0]);
         
         locale = await currentUser.users[0].locale;
         locale_code = await currentUser.users[0].locale_code;
@@ -125,7 +124,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
         orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
-        console.log(orgDetails);
         
         checkInStatus = meetingDetails.data[0].Check_In_Status;
         checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
@@ -133,8 +131,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         givenLocation = meetingDetails.data[0].Venue;
         endTime = meetingDetails.data[0].End_DateTime;
-        console.log(endTime+", "+meetingDetails.data[0].Start_DateTime);
-        console.log(meetingDetails.data[0]);
         
         meeting_title.textContent = meetingDetails.data[0].Event_Title;
         meeting_time.textContent = formatDateRange(getTimeToDisplay(meetingDetails.data[0].Start_DateTime, orgDetails.org[0].time_zone), getTimeToDisplay(meetingDetails.data[0].End_DateTime, orgDetails.org[0].time_zone));
@@ -183,7 +179,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             const currentDate = new Date();
             const endingTime = new Date(endTime);
 
-            if (currentDate > endingTime) {
+            // if (currentDate > endingTime) {
                 const originalText = checkOutBtn.innerHTML;
                 checkOutBtn.id = "button-in-progress"
                 checkOutBtn.textContent = langObj["button-in-progress"];
@@ -259,12 +255,12 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                     showToast(langObj["toast-geolocation-not-supported"], "red");
                     btnBackToAction()
                 }
-            }
-            else {
-                showToast(langObj["toast-meeting-not-ended"], "#eed202");
+            // }
+            // else {
+            //     showToast(langObj["toast-meeting-not-ended"], "#eed202");
 
-                btnBackToAction();
-            }
+            //     btnBackToAction();
+            // }
 
         });
     }
