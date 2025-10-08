@@ -5,7 +5,7 @@
   "actual-status-success": "已成功签退！",
   "actual-status-already-done": "已签退！",
   "actual-status-check-in-pending": "尚未入住！",
-  "button-in-progress": "正在签退... ⏳",
+  "button-in-progress": "处理中... ⏳",
   "button-success": "已签退",
   "button-pending": "立即签退",
   "status-loading": "加载中...",

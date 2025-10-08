@@ -5,7 +5,7 @@
   "actual-status-success": "Checked Out Successfully!",
   "actual-status-already-done": "Checked Out!",
   "actual-status-check-in-pending": "Yet to Check In!",
-  "button-in-progress": "Checking out... ⏳",
+  "button-in-progress": "Processing... ⏳",
   "button-success": "Checked Out",
   "button-pending": "Checkout Now",
   "status-loading":"Loading...",

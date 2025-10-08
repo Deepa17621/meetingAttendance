@@ -111,9 +111,9 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                 stage.textContent = langObj[stage.id];
             });
             detailsRow.forEach(row => {
-                let firstTd = row.querySelector("td:first-child"); // pick only the first td
+                let firstTd = row.querySelector("td:first-child"); 
                 if (firstTd) {
-                    firstTd.textContent = langObj[firstTd.id]; // change text
+                    firstTd.textContent = langObj[firstTd.id]; 
                 }
             });
         }
@@ -255,7 +255,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
                         else if (givenLocation) {
-                            // JSON.parse(geoCode_OfGivenLocation.details.output).status === "success"
                             if (geoCode_OfGivenLocation !== null) {
                                 let distance = calculateDistance(position, geoCode_OfGivenLocation);
                                 if (distance <= 2000) {
@@ -273,7 +272,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
                         }
                     } catch (err) {
-                        console.error("Error during checkout:", err);
                         showToast(langObj["toast-unexpected-error"], "red");
                         btnBackToAction();
                     } finally {
@@ -433,7 +431,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
 
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
-    let notesContent = "Checked Out @" + location.display_name;
+    let notesContent = "Checked Out @" + location.address;
 
     var notesConfig = {
         Entity: "Notes",
@@ -512,7 +510,7 @@ function getUTCOffsetFromTimeZone(timeZone, date = new Date()) {
 
     // Difference in minutes
     let diff = (local - date.getTime()) / 60000;
-    diff = Math.round(diff); // ✅ round to nearest minute
+    diff = Math.round(diff); 
 
     const sign = diff >= 0 ? "+" : "-";
     const abs = Math.abs(diff);
