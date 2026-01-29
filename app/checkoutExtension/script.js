@@ -17,6 +17,7 @@ let detailsRow = document.querySelectorAll(".detail-row");
 detailsRow = [...detailsRow];
 let stageText = document.querySelectorAll(".txt");
 stageText = [...stageText];
+let chinese, is_English;
 
 function showLoader() {
     const loader = document.getElementById("loader");
@@ -111,9 +112,9 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                 stage.textContent = langObj[stage.id];
             });
             detailsRow.forEach(row => {
-                let firstTd = row.querySelector("td:first-child"); 
+                let firstTd = row.querySelector("td:first-child");
                 if (firstTd) {
-                    firstTd.textContent = langObj[firstTd.id]; 
+                    firstTd.textContent = langObj[firstTd.id];
                 }
             });
         }
@@ -183,7 +184,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
             // if (currentDate > endingTime) {
             const originalText = checkOutBtn.innerHTML;
-            checkOutBtn.id = "button-in-progress"
+            checkOutBtn.id = "button-in-progress";
             checkOutBtn.textContent = langObj["button-in-progress"];
             checkOutBtn.disabled = true;
 
@@ -212,14 +213,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             }
 
             let duration = durationTime();
-            // var req_data = {
-            //     "arguments": JSON.stringify({
-            //         "location": givenLocation
-            //     })
-            // };
 
-            // let func_name = "attendanceforcrmmeetings__getlocation";
-            // let geoCode_OfGivenLocation = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
             function getPointWrapper(address) {
                 return new Promise((resolve, reject) => {
                     try {
@@ -246,7 +240,41 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                 }
             }
 
-            let geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
+            // i. Check the Location Language
+
+            let geoCode_OfGivenLocation;
+
+            if (givenLocation) {
+                const sanitized = sanitizeInput(givenLocation);
+                chinese = isChinese(sanitized);
+                is_English = isEnglish(sanitized);
+
+                if (chinese) {
+                    geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
+                    let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+                    let validated = validateGeocode(geoCode_OfGivenLocation);
+                    if (validated.status === "LOW_CONFIDENCE") {
+                        return { suggestions: geo.matches };
+                    }
+                }
+                else if (isEnglish(sanitized)) {
+                    var req_data = {
+                        "arguments": JSON.stringify({
+                            "location": givenLocation
+                        })
+                    };
+
+                    let func_name = "attendanceforcrmmeetings__getlocation";
+                    let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+
+                    if (zohoMapsResponse.details.output != "") {
+                        let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
+                        geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
+                        let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+                    }
+
+                }
+            }
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function (position) {
@@ -255,20 +283,20 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
                         else if (givenLocation) {
-                            if (geoCode_OfGivenLocation !== null) {
-                                let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                                if (distance <= 2000) {
-                                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                                }
-                                else {
-                                    showToast(langObj["toast-location-not-in-boundry"], "red");
-                                    btnBackToAction();
-                                }
-                            }
-                            else {
-                                showToast("Unable to Geocode!", "red");
-                                btnBackToAction();
-                            }
+                            // if (geoCode_OfGivenLocation !== null) {
+                            //     let distance = calculateDistance(position, geoCode_OfGivenLocation);
+                            //     if (distance <= 2000) {
+                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                            //     }
+                            //     else {
+                            //         showToast(langObj["toast-location-not-in-boundry"], "red");
+                            //         btnBackToAction();
+                            //     }
+                            // }
+                            // else {
+                            //     showToast("Unable to Geocode!", "red");
+                            //     btnBackToAction();
+                            // }
 
                         }
                     } catch (err) {
@@ -318,7 +346,25 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
 async function checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser) {
     // let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-    let reverseLocation = await reverseLocBaiduResponse( position.coords.longitude,  position.coords.latitude);
+    let reverseLocation;
+    if (chinese) {
+        reverseLocation = await reverseLocBaiduResponse(position.coords.longitude, position.coords.latitude);
+    }
+    else if (isEnglish) {
+        var req_data = {
+            "arguments": JSON.stringify({
+                "location": {
+                    "lat": position.coords.latitude,
+                    "lon": position.coords.longitude
+                }
+            })
+        };
+
+        let func_name = "attendanceforcrmmeetings__reversegeocode";
+        let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+        reverseLocation = JSON.parse(zohoMapsResponse.details.output);
+    }
+
     if (reverseLocation !== null) {
         let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
         meetingStatus.classList.add("success");
@@ -394,44 +440,87 @@ function formatDateRange(start, end) {
 }
 
 async function updateMeetingRecord(location, time, currentRecord, position, durationTime, currentUser) {
-    console.log(location);
-    let locationObjectKeys = Object.keys(location.address);
-    let keys = locationObjectKeys.slice(0, 3);
-    const matchingKeys = keys.filter((key) =>
-        key.toLowerCase().startsWith("sub")
-    );
-    let city, subLocality;
-    if (location.address.city) {
-        city = location.address.city;
-        subLocality = location.address[matchingKeys[0]];
-    } else {
-        city = location.address.town;
-        subLocality = location.address[matchingKeys[0]];
+
+    // let locationObjectKeys = Object.keys(location.address ? location.address : location.label);
+    // console.log(locationObjectKeys);
+
+    // let keys = locationObjectKeys.slice(0, 3);
+    // const matchingKeys = keys.filter((key) =>
+    //     key.toLowerCase().startsWith("sub")
+    // );
+    // let city, subLocality;
+    // if (location.address.city) {
+    //     city = location.address.city;
+    //     subLocality = location.address[matchingKeys[0]];
+    // } else {
+    //     city = location.address.town;
+    //     subLocality = location.address[matchingKeys[0]];
+    // }
+    let extensionConfig, fullAddress;
+    if (chinese) {
+        fullAddress = location.address;
+        extensionConfig = {
+            Entity: "Events",
+            APIData: {
+                id: currentRecord.EntityId[0],
+                attendanceforcrmmeetings__Checkout_City: location.addressComponents.city,
+                attendanceforcrmmeetings__Checkout_Country: location.content.address_detail.country,
+                attendanceforcrmmeetings__Checkout_State: location.addressComponents.province,
+                attendanceforcrmmeetings__Checkout_Address: location.address,
+                attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
+                attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
+                attendanceforcrmmeetings__Checkout_Zipcode: location.address.postcode,
+                attendanceforcrmmeetings__Checkout_Time: time.toString(),
+                attendanceforcrmmeetings__Check_out_Sub_Locality: location.content.address_detail.town,
+                attendanceforcrmmeetings__Meeting_Duration: durationTime,
+                attendanceforcrmmeetings__Checkout_By: currentUser.users[0].full_name,
+            },
+            Trigger: ["workflow"],
+        };
     }
-
+    if (is_English) {
+        fullAddress = location.label;
+        extensionConfig = {
+            Entity: "Events",
+            APIData: {
+                id: currentRecord.EntityId[0],
+                attendanceforcrmmeetings__Checkout_City: location.city,
+                attendanceforcrmmeetings__Checkout_Country: location.country,
+                attendanceforcrmmeetings__Checkout_State: location.state,
+                attendanceforcrmmeetings__Checkout_Address: location.label,
+                attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
+                attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
+                attendanceforcrmmeetings__Checkout_Zipcode: location.postal_code,
+                attendanceforcrmmeetings__Checkout_Time: time.toString(),
+                attendanceforcrmmeetings__Check_out_Sub_Locality: location.address_line2,
+                attendanceforcrmmeetings__Meeting_Duration: durationTime,
+                attendanceforcrmmeetings__Checkout_By: currentUser.users[0].full_name,
+            },
+            Trigger: ["workflow"],
+        };
+    }
     // FIELDS FROM EXTENSION
-    var extensionConfig = {
-        Entity: "Events",
-        APIData: {
-            id: currentRecord.EntityId[0],
-            attendanceforcrmmeetings__Checkout_City: location.addressComponents.city,
-            attendanceforcrmmeetings__Checkout_Country: location.content.address_detail.country,
-            attendanceforcrmmeetings__Checkout_State: location.addressComponents.province,
-            attendanceforcrmmeetings__Checkout_Address: location.address,
-            attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
-            attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
-            attendanceforcrmmeetings__Checkout_Zipcode: location.address.postcode,
-            attendanceforcrmmeetings__Checkout_Time: time.toString(),
-            attendanceforcrmmeetings__Check_out_Sub_Locality: location.content.address_detail.town,
-            attendanceforcrmmeetings__Meeting_Duration: durationTime,
-            attendanceforcrmmeetings__Checkout_By: currentUser.users[0].full_name,
-        },
-        Trigger: ["workflow"],
-    };
-
+    // var extensionConfig = {
+    //     Entity: "Events",
+    //     APIData: {
+    //         id: currentRecord.EntityId[0],
+    //         attendanceforcrmmeetings__Checkout_City: location.addressComponents ? location.addressComponents.city : location.city,
+    //         attendanceforcrmmeetings__Checkout_Country: location.content.address_detail.country ? location.content.address_detail.country : location.country,
+    //         attendanceforcrmmeetings__Checkout_State: location.addressComponents.province ? location.addressComponents.province : location.state,
+    //         attendanceforcrmmeetings__Checkout_Address: location.address ? location.address : location.label,
+    //         attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
+    //         attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
+    //         attendanceforcrmmeetings__Checkout_Zipcode: location.address.postcode ? location.address.postcode : location.postal_code,
+    //         attendanceforcrmmeetings__Checkout_Time: time.toString(),
+    //         attendanceforcrmmeetings__Check_out_Sub_Locality: location.content?.address_detail?.town ? location.content.address_detail.town : location.address_line2,
+    //         attendanceforcrmmeetings__Meeting_Duration: durationTime,
+    //         attendanceforcrmmeetings__Checkout_By: currentUser.users[0].full_name,
+    //     },
+    //     Trigger: ["workflow"],
+    // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
-
-    let notesContent = "Checked Out @" + location.address;
+   
+    let notesContent = "Checked Out @" + fullAddress;
 
     var notesConfig = {
         Entity: "Notes",
@@ -449,6 +538,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
         return true;
     } else return false;
 }
+
 function getTimeToDisplay(isoString, locale) {
     const d = new Date(isoString);
 
@@ -510,7 +600,7 @@ function getUTCOffsetFromTimeZone(timeZone, date = new Date()) {
 
     // Difference in minutes
     let diff = (local - date.getTime()) / 60000;
-    diff = Math.round(diff); 
+    diff = Math.round(diff);
 
     const sign = diff >= 0 ? "+" : "-";
     const abs = Math.abs(diff);
@@ -546,6 +636,32 @@ function getCurrentTimeInIST(inp, timeZone) {
 }
 
 let activeToast = null;
+
+function isChinese(text) {
+    return /[\u4e00-\u9fff]/.test(text);
+}
+
+function isEnglish(text) {
+    return /^[A-Za-z0-9\s,.-]+$/.test(text);
+}
+
+function sanitizeInput(text) {
+    return text
+        .trim()
+        .replace(/[^\w\s\u4e00-\u9fff,.-]/g, "");
+}
+
+function validateGeocode(result) {
+    if (!result || !result.lat || !result.lng) {
+        throw new Error("Invalid geocoding result");
+    }
+
+    if (result.confidence && result.confidence < 0.7) {
+        return { status: "LOW_CONFIDENCE", result };
+    }
+
+    return { status: "VALID", result };
+}
 
 function showToast(message, color) {
     // Remove previous toast if still visible
