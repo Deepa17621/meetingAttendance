@@ -19,6 +19,8 @@
   "toast-already-checked-out":"Check-out already done.",
   "toast-location-not-in-boundry":"Current Location is not in boundary!",
   "toast-error-contact-support":"Unexpected error. Contact support.",
+  "i-banner-content-row1":"Location accuracy may vary",
+  "i-banner-content-row2":"Please ensure accurate location details.",
   "detail-title":"Meeting Title",
   "detail-time":"Meeting Time",
   "detail-venue":"Meeting Venue",

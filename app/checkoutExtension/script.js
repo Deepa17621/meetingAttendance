@@ -11,6 +11,9 @@ let pendingProgressCircle = document.querySelector(".progress-pending");
 let activeProgressCircle = document.querySelector(".progress-active");
 let successProgressCircle = document.querySelector(".progress-success");
 
+let i_banner_content_row1 = document.querySelector("#i-banner-content-row1");
+let i_banner_content_row2 = document.querySelector("#i-banner-content-row2");
+
 let toastVisible = false;
 
 let detailsRow = document.querySelectorAll(".detail-row");
@@ -118,6 +121,8 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                 }
             });
         }
+        i_banner_content_row1.textContent = langObj[i_banner_content_row1.id];
+        i_banner_content_row2.textContent = langObj[i_banner_content_row2.id];
 
         // 1. Get Meeting Record Details
         let meetingRecordConfig = {
@@ -283,20 +288,20 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
                         else if (givenLocation) {
-                            // if (geoCode_OfGivenLocation !== null) {
-                            //     let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                            //     if (distance <= 2000) {
-                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                            //     }
-                            //     else {
-                            //         showToast(langObj["toast-location-not-in-boundry"], "red");
-                            //         btnBackToAction();
-                            //     }
-                            // }
-                            // else {
-                            //     showToast("Unable to Geocode!", "red");
-                            //     btnBackToAction();
-                            // }
+                            if (geoCode_OfGivenLocation !== null) {
+                                let distance = calculateDistance(position, geoCode_OfGivenLocation);
+                                if (distance <= 2000) {
+                                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                                }
+                                else {
+                                    showToast(langObj["toast-location-not-in-boundry"], "red");
+                                    btnBackToAction();
+                                }
+                            }
+                            else {
+                                showToast("Unable to Geocode!", "red");
+                                btnBackToAction();
+                            }
 
                         }
                     } catch (err) {
@@ -350,7 +355,7 @@ async function checkOutProcess(position, formattedCheckOutTime, data, duration, 
     if (chinese) {
         reverseLocation = await reverseLocBaiduResponse(position.coords.longitude, position.coords.latitude);
     }
-    else if (isEnglish) {
+    else {
         var req_data = {
             "arguments": JSON.stringify({
                 "location": {
@@ -519,7 +524,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     //     Trigger: ["workflow"],
     // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
-   
+
     let notesContent = "Checked Out @" + fullAddress;
 
     var notesConfig = {
