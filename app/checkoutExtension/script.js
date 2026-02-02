@@ -87,7 +87,7 @@ function calculateDistance(currentLocation, targetLocation) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 }
-let meetingDetails, currentUser, orgDetails, locale, locale_code, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime, baiduMap, d;
+let meetingDetails, currentUser, orgDetails, locale, locale_code, langObj, checkInStatus, checkOutTime, checkInTime, givenLocation, endTime, baiduMap, d, currentStateOfDistanceRestriction;
 
 // Page Load
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -98,6 +98,13 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         await new Promise(r => setTimeout(r, 150));
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
+
+        var req_data = {};
+
+        let func_name = "attendanceforcrmmeetings__getdistancerestrictionflag";
+
+        let distanceFlag = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+        currentStateOfDistanceRestriction = distanceFlag.details.output;
 
         locale = await currentUser.users[0].locale;
         locale_code = await currentUser.users[0].locale_code;
@@ -284,10 +291,13 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function (position) {
                     try {
-                        if (!givenLocation) {
+                        if(currentStateOfDistanceRestriction == "false"){
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
-                        else if (givenLocation) {
+                        else if (!givenLocation ) {
+                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                        }
+                        else{
                             if (geoCode_OfGivenLocation !== null) {
                                 let distance = calculateDistance(position, geoCode_OfGivenLocation);
                                 if (distance <= 2000) {
@@ -483,7 +493,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
             Trigger: ["workflow"],
         };
     }
-    if (is_English) {
+    else {
         fullAddress = location.label;
         extensionConfig = {
             Entity: "Events",
