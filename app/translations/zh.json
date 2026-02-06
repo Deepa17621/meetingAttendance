@@ -36,5 +36,11 @@
   "yet-to-check-in": "未签入",
   "btn-check-out-now": "立即签退" ,
   "AM":"上午",
-  "PM":"下午"
+  "PM":"下午",
+  "SETTINGS_heading": "关于",
+  "SETTINGS_row1_content": "此扩展允许用户在 Web CRM 和移动 CRM 中从 CRM 会议中签出。签出详情会通过自定义字段安全地记录在会议记录中。",
+  "SETTINGS_row2_content": "可以从会议列表视图或会议详情页面进行签出。需要通过移动 CRM 进行有效签到，并且只有在会议结束时间之后才能签出。",
+  "SETTINGS_NOTE_heading": "基于位置的结账限制",
+  "SETTINGS_NOTE_row1": "为了获得最佳效果，请确保提供准确的位置信息。",
+  "SETTINGS_NOTE_row2": "在某些情况下，位置信息可能是大概的，这可能会影响基于距离的验证。"
 }

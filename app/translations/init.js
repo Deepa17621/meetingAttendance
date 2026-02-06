@@ -1,3 +1,12 @@
+// Elements
+// let SETTINGS_heading = document.querySelector("#SETTINGS_heading");
+// let SETTINGS_row1_content = document.querySelector("#SETTINGS_row1_content");
+// let SETTINGS_row2_content = document.querySelector("#SETTINGS_row2_content");
+// let SETTINGS_NOTE_heading = document.querySelector("#SETTINGS_NOTE_heading");
+// let SETTINGS_NOTE_row1 = document.querySelector("#SETTINGS_NOTE_row1");
+// let SETTINGS_NOTE_row2 = document.querySelector("#SETTINGS_NOTE_row2");
+
+// let elementsArray = [SETTINGS_heading, SETTINGS_row1_content, SETTINGS_row2_content, SETTINGS_NOTE_heading, SETTINGS_NOTE_row1, SETTINGS_NOTE_row2 ]
 async function getTranslatedObject(locale) {
   let langObj = async () => {
     if (locale.startsWith("en")) {
@@ -16,6 +25,13 @@ async function getTranslatedObject(locale) {
 
 async function startTranslation(langObj) {
   (document.querySelector("#title")).textContent = langObj["title"];
+  //  if (langObj) {
+  //           elementsArray.forEach(ele => {
+  //               ele.textContent = langObj[ele.id];
+  //           });
+  //       }
+
+
 }
 
 function showLoader() {

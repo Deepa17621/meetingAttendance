@@ -6,22 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout for CRM Meetings-about</title>
     <script src="https://live.zwidgets.com/js-sdk/1.4/ZohoEmbededAppSDK.min.js"></script>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+        integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="../translations/init.js" defer></script>
 </head>
 
 <body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
     <div class="page">
-        <header>About</header>
+        <header id="SETTINGS_heading">About</header>
 
         <main>
-            <div class="row">
+            <div class="row" id="SETTINGS_row1_content">
                 This extension enables users to check out from CRM meetings across both Web CRM and Mobile CRM.
                 Check-out details are securely recorded within the meeting record using custom fields.
             </div>
 
-            <div class="row">
+            <div class="row" id="SETTINGS_row2_content">
                 Check-out can be performed from the Meetings list view or the Meeting details page.
                 A valid check-in through Mobile CRM is required, and check-out is allowed only after the meeting end
                 time.
@@ -31,15 +38,15 @@
 
             <div class="location-note-container">
                 <div class="location-note-hdr">
-                    <h3 class="location-note-hdr txt">Location Based Check-out Restriction </h3> 
+                    <h3 class="location-note-hdr txt" id="SETTINGS_NOTE_heading">Location Based Check-out Restriction </h3> 
                     <label class="toggle">
                         <input type="checkbox" id="toggle" />
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="location-note-body">
-                    <p>For optimal results, please ensure accurate location details are provided.</p>
-                    <p>In some cases, location information may be approximate, which can affect
+                    <p id="SETTINGS_NOTE_row1">For optimal results, please ensure accurate location details are provided.</p>
+                    <p id="SETTINGS_NOTE_row2">In some cases, location information may be approximate, which can affect
                         distance-based validations.</p>
                 </div>
             </div>

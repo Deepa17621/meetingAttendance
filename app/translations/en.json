@@ -36,5 +36,11 @@
   "yet-to-check-in":"Not Checked In",
   "btn-check-out-now":"Check-out now",
   "AM":"AM",
-  "PM":"PM"
+  "PM":"PM",
+  "SETTINGS_heading": "About",
+  "SETTINGS_row1_content": "This extension enables users to check out from CRM meetings across both Web CRM and Mobile CRM. Check-out details are securely recorded within the meeting record using custom fields.",
+  "SETTINGS_row2_content": "Check-out can be performed from the Meetings list view or the Meeting details page. A valid check-in through Mobile CRM is required, and check-out is allowed only after the meeting end time.",
+  "SETTINGS_NOTE_heading": "Location Based Check-out Restriction",
+  "SETTINGS_NOTE_row1": "For optimal results, please ensure accurate location details are provided.",
+  "SETTINGS_NOTE_row2": "In some cases, location information may be approximate, which can affect distance-based validations."
 }

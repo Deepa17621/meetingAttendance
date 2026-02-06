@@ -37,11 +37,21 @@ function dynamicContent(statusContent, btnContent, langObject, stage, status) {
 
     meetingStatus.id = statusContent;
     meetingStatus.innerHTML = langObject[statusContent];
+
     checkOutBtn.id = btnContent;
     checkOutBtn.textContent = langObject[btnContent];
 
+    // Reset old classes
+    meetingStatus.className = "";
+    checkOutBtn.className = "";
+
     meetingStatus.classList.add(status);
     checkOutBtn.classList.add(status);
+
+    // Reset progress states
+    activeProgressCircle.className = "";
+    pendingProgressCircle.className = "";
+    successProgressCircle.className = "";
 
     if (stage === "Check-out-success") {
         activeProgressCircle.classList.add("success");
@@ -109,11 +119,11 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         locale = await currentUser.users[0].locale;
         locale_code = await currentUser.users[0].locale_code;
 
-        if (locale.startsWith("en")) {
+        if (locale_code.startsWith("en")) {
             let res = await fetch("../translations/en.json");
             langObj = await res.json();
         }
-        else if (locale.startsWith("zh")) {
+        else if (locale_code.startsWith("zh")) {
             let res = await fetch("../translations/zh.json");
             langObj = await res.json();
         }
@@ -291,13 +301,13 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function (position) {
                     try {
-                        if(currentStateOfDistanceRestriction == "false"){
+                        if (currentStateOfDistanceRestriction == "false") {
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
-                        else if (!givenLocation ) {
+                        else if (!givenLocation) {
                             await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                         }
-                        else{
+                        else {
                             if (geoCode_OfGivenLocation !== null) {
                                 let distance = calculateDistance(position, geoCode_OfGivenLocation);
                                 if (distance <= 2000) {
