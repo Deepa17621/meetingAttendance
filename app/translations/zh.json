@@ -25,6 +25,9 @@
   "toast-time-restriction-enable": "已启用时间限制！",
   "toast-time-restriction-disable": "已禁用时间限制!",
   "toast-distance-updated": "距离值已更新",
+  "toast-distance-not-entered": "请先配置距离后再保存",
+  "toast-distance-not-in-range": "请输入 1 到 10 公里范围内的距离",
+  "toast-distance-decimal": "请输入整数。",
 
   "i-banner-content-row1":"定位精度可能会有所不同",
   "i-banner-content-row2":"请确保位置信息准确无误。",

@@ -18,7 +18,14 @@ let SETTINGS_NOTE_heading = document.querySelector("#SETTINGS_NOTE_heading");
 let SETTINGS_NOTE_row1 = document.querySelector("#SETTINGS_NOTE_row1");
 let SETTINGS_NOTE_row2 = document.querySelector("#SETTINGS_NOTE_row2");
 
-let elementsArray = [SETTINGS_heading, SETTINGS_row1_content, SETTINGS_row2_content, SETTINGS_NOTE_heading, SETTINGS_NOTE_row1, SETTINGS_NOTE_row2]
+let SETTINGS_Configure_Label = document.querySelector("#SETTINGS_Configure_Label");
+
+let SETTINGS_Time_NOTE_heading = document.querySelector("#SETTINGS_Time_NOTE_heading");
+let SETTINGS_Time_NOTE_row1 = document.querySelector("#SETTINGS_Time_NOTE_row1");
+let SETTINGS_Time_NOTE_row2 = document.querySelector("#SETTINGS_Time_NOTE_row2");
+
+
+let elementsArray = [SETTINGS_heading, SETTINGS_row1_content, SETTINGS_row2_content, SETTINGS_NOTE_heading, SETTINGS_NOTE_row1, SETTINGS_NOTE_row2, SETTINGS_Configure_Label, SETTINGS_Time_NOTE_heading,SETTINGS_Time_NOTE_row1, SETTINGS_Time_NOTE_row2];
 
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
     showLoader();
@@ -101,7 +108,15 @@ document.querySelector(".distance-save").addEventListener("click", async (e) => 
     e.preventDefault();
     let distance = document.querySelector("#distance").value;
     if (!distance) {
-        showToast("Please configure distance to save", "red");
+        showToast(langObj["toast-distance-not-entered"], "red");
+        return;
+    }
+    else if(distance >=11 || distance <=0){
+        showToast(langObj["toast-distance-not-in-range"], "red");
+        return;
+    }
+    else if(Number(distance) % 1 !== 0){
+        showToast(langObj["toast-distance-decimal"], "red");
         return;
     }
     else {
