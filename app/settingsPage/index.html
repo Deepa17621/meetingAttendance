@@ -35,23 +35,48 @@
                 time.
             </div>
 
-            <div class="divider"></div>
+            <!-- <div class="divider"></div> -->
 
-            <div class="location-note-container">
-                <div class="location-note-hdr">
-                    <h3 class="location-note-hdr txt" id="SETTINGS_NOTE_heading">Location Based Check-out Restriction
-                    </h3>
-                    <label class="toggle">
-                        <input type="checkbox" id="toggle" />
-                        <span class="slider"></span>
-                    </label>
+
+
+            <!-- <div class="divider"></div> -->
+
+            <section class="note-wrapper">
+                <div class="location-note-container">
+                    <div class="location-note-hdr">
+                        <h3 class="location-note-hdr txt" id="SETTINGS_Time_NOTE_heading">Time Based Check-out
+                            Restriction
+                        </h3>
+                        <label class="toggle">
+                            <input type="checkbox" id="time-restriction-toggle" />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="location-note-body">
+                        <p id="SETTINGS_Time_NOTE_row1">Users can enable or disable the time-based restriction for
+                            check-out.</p>
+                        <p id="SETTINGS_Time_NOTE_row2">This setting controls whether users are allowed to check out
+                            before
+                            the meeting end time.</p>
+                    </div>
                 </div>
-                <div class="location-note-body">
-                    <p id="SETTINGS_NOTE_row1">For optimal results, please ensure accurate location details are
-                        provided.</p>
-                    <p id="SETTINGS_NOTE_row2">In some cases, location information may be approximate, which can affect
-                        distance-based validations.</p>
-                    <!-- <p class="SETTINGS_configure_distance">
+                <div class="location-note-container">
+                    <div class="location-note-hdr">
+                        <h3 class="location-note-hdr txt" id="SETTINGS_NOTE_heading">Location Based Check-out
+                            Restriction
+                        </h3>
+                        <label class="toggle">
+                            <input type="checkbox" id="toggle" />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="location-note-body">
+                        <p id="SETTINGS_NOTE_row1">For optimal results, please ensure accurate location details are
+                            provided.</p>
+                        <p id="SETTINGS_NOTE_row2">In some cases, location information may be approximate, which can
+                            affect
+                            distance-based validations.</p>
+                        <!-- <p class="SETTINGS_configure_distance">
                         <label for="distance" class="distance-label">Configure Distance Restriction (in km)</label>
                         <input type="number" id="distance" name="distance" min="1" max="10" step="1"
                             placeholder="Enter distance in km" />
@@ -59,38 +84,36 @@
                         <span class="icon distance-cancel" title="Cancel"><i class="fa-solid fa-xmark"></i></span>
                     </p> -->
 
-                    <p class="SETTINGS_configure_distance">
+                        <p class="SETTINGS_configure_distance">
 
-                        <label class="distance-label">
-                            Configure Distance Restriction (in km)
-                        </label>
+                            <label class="distance-label" id="SETTINGS_Configure_Label">
+                                Configure Distance Restriction (in km)
+                            </label>
 
-                        <span class="view-mode-wrapper">
-                            <!-- View mode -->
-                            <span class="distance-value" id="distanceValue">
-                                5 km
+                            <span class="view-mode-wrapper">
+                                <!-- View mode -->
+                                <span class="distance-value" id="distanceValue">
+                                    5 km
+                                </span>
+                                <span class="icon distance-edit" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </span>
                             </span>
-                            <span class="icon distance-edit" title="Edit">
-                                <i class="fa-solid fa-pen"></i>
+
+                            <!-- Edit mode -->
+                            <span class="distance-edit-wrapper hidden">
+                                <input type="number" id="distance" name="distance" min="1" max="10" step="1" />
+                                <span class="icon distance-save" title="Save">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <span class="icon distance-cancel" title="Cancel">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </span>
                             </span>
-                        </span>
-
-                        <!-- Edit mode -->
-                        <span class="distance-edit-wrapper hidden">
-                            <input type="number" id="distance" name="distance" min="1" max="10" step="1" />
-                            <span class="icon distance-save" title="Save">
-                                <i class="fa-solid fa-check"></i>
-                            </span>
-                            <span class="icon distance-cancel" title="Cancel">
-                                <i class="fa-solid fa-xmark"></i>
-                            </span>
-                        </span>
-
-                    </p>
-
-
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
     <script src="script.js"></script>

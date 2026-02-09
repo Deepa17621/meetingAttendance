@@ -17,7 +17,8 @@ let i_banner_content_row2 = document.querySelector("#i-banner-content-row2");
 let toastVisible = false;
 let distance_restriction_flag = "attendanceforcrmmeetings__Distance_Restriction_Flag";
 let distance_value = "attendanceforcrmmeetings__Distance";
-let existingDistanceValue;
+let time_restriction_flag = "attendanceforcrmmeetings__TimeRestrictionOption";
+let existingDistanceValue, ExistingTimeRestrictionFlag;
 
 let detailsRow = document.querySelectorAll(".detail-row");
 detailsRow = [...detailsRow];
@@ -105,8 +106,10 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         let distanceFlag = await getVariables(distance_restriction_flag);
         let configured_distance = await getVariables(distance_value);
+        let ExistingTimeRestriction = await getVariables(time_restriction_flag);
+        ExistingTimeRestrictionFlag = ExistingTimeRestriction.details.output;
         existingDistanceValue = configured_distance.details.output;
-        
+
         currentStateOfDistanceRestriction = distanceFlag.details.output;
 
         locale = await currentUser.users[0].locale;
@@ -197,148 +200,18 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             const currentDate = new Date();
             const endingTime = new Date(endTime);
 
-            // if (currentDate > endingTime) {
-            const originalText = checkOutBtn.innerHTML;
-            checkOutBtn.id = "button-in-progress";
-            checkOutBtn.textContent = langObj["button-in-progress"];
-            checkOutBtn.disabled = true;
-
-            let formattedCheckOutTime = getCurrentTimeInIST(currentDate, orgDetails.org[0].time_zone);
-
-            let durationTime = function durationsTime() {
-                const inTime = new Date(checkInTime);
-                const outTime = new Date(currentDate);
-
-                const duration = outTime - inTime;
-
-                const inSeconds = duration / 1000;
-
-                const inMinutes = Math.floor(inSeconds / 60);
-                const hours = Math.floor(duration / (1000 * 60 * 60));
-                const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-                if (inMinutes >= 60) {
-                    return `${hours} hours ${minutes} minutes`;
-                } else if (inMinutes > 0 && inMinutes < 60) {
-                    return `${inMinutes} minutes`;
+            if (ExistingTimeRestrictionFlag == "true") {
+                if (currentDate > endingTime) {
+                    await mainFunction(currentDate, endingTime, data);
                 }
                 else {
-                    return `${inSeconds} seconds`;
+                    showToast(langObj["toast-meeting-not-ended"], "#eed202");
+                    btnBackToAction();
                 }
             }
-
-            let duration = durationTime();
-
-            function getPointWrapper(address) {
-                return new Promise((resolve, reject) => {
-                    try {
-                        const myGeo = new BMapGL.Geocoder();
-                        myGeo.getPoint(address, function (point) {
-                            if (point) {
-                                resolve(point);
-                            } else {
-                                reject(point);
-                            }
-                        });
-                    } catch (err) {
-                        reject(err);
-                    }
-                });
+            else {
+                await mainFunction(currentDate, endingTime, data);
             }
-
-            async function geoCodeTheLocation(loc) {
-                try {
-                    let point = await getPointWrapper(loc);
-                    return point;
-                } catch (err) {
-                    return err;
-                }
-            }
-
-            // i. Check the Location Language
-
-            let geoCode_OfGivenLocation;
-
-            if (givenLocation) {
-                const sanitized = sanitizeInput(givenLocation);
-                chinese = isChinese(sanitized);
-                is_English = isEnglish(sanitized);
-
-                if (chinese) {
-                    console.log("Deepa");
-
-                    geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
-                    let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
-                    console.log(re);
-
-                    let validated = validateGeocode(geoCode_OfGivenLocation);
-                    if (validated.status === "LOW_CONFIDENCE") {
-                        return { suggestions: geo.matches };
-                    }
-                }
-                else if (isEnglish(sanitized)) {
-                    var req_data = {
-                        "arguments": JSON.stringify({
-                            "location": givenLocation
-                        })
-                    };
-
-                    let func_name = "attendanceforcrmmeetings__getlocation";
-                    let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
-                    console.log(zohoMapsResponse);
-                    if (zohoMapsResponse.details.output != "") {
-                        let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
-                        geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
-                        let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
-                    }
-
-                }
-            }
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async function (position) {
-                    try {
-                        if (currentStateOfDistanceRestriction == "false") {
-                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                        }
-                        else if (!givenLocation) {
-                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                        }
-                        else {
-                            if (geoCode_OfGivenLocation !== null) {
-                                let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                                if (distance <= (existingDistanceValue)*1000) {
-                                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                                }
-                                else {
-                                    showToast(langObj["toast-location-not-in-boundry"], "red");
-                                    btnBackToAction();
-                                }
-                            }
-                            else {
-                                showToast("Unable to Geocode!", "red");
-                                btnBackToAction();
-                            }
-
-                        }
-                    } catch (err) {
-                        showToast(langObj["toast-unexpected-error"], "red");
-                        btnBackToAction();
-                    } finally {
-                        checkOutBtn.disabled = false;
-                    }
-                });
-            } else {
-                checkOutBtn.innerHTML = originalText;
-                showToast(langObj["toast-geolocation-not-supported"], "red");
-                btnBackToAction()
-            }
-            // }
-            // else {
-            //     showToast(langObj["toast-meeting-not-ended"], "#eed202");
-
-            //     btnBackToAction();
-            // }
 
         });
     }
@@ -365,6 +238,148 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
     //   return;
     // }
 });
+
+
+async function mainFunction(currentDate, endingTime, data) {
+    const originalText = checkOutBtn.innerHTML;
+    checkOutBtn.id = "button-in-progress";
+    checkOutBtn.textContent = langObj["button-in-progress"];
+    checkOutBtn.disabled = true;
+
+    let formattedCheckOutTime = getCurrentTimeInIST(currentDate, orgDetails.org[0].time_zone);
+
+    let durationTime = function durationsTime() {
+        const inTime = new Date(checkInTime);
+        const outTime = new Date(currentDate);
+
+        const duration = outTime - inTime;
+
+        const inSeconds = duration / 1000;
+
+        const inMinutes = Math.floor(inSeconds / 60);
+        const hours = Math.floor(duration / (1000 * 60 * 60));
+        const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (inMinutes >= 60) {
+            return `${hours} hours ${minutes} minutes`;
+        } else if (inMinutes > 0 && inMinutes < 60) {
+            return `${inMinutes} minutes`;
+        }
+        else {
+            return `${inSeconds} seconds`;
+        }
+    }
+
+    let duration = durationTime();
+
+    function getPointWrapper(address) {
+        return new Promise((resolve, reject) => {
+            try {
+                const myGeo = new BMapGL.Geocoder();
+                myGeo.getPoint(address, function (point) {
+                    if (point) {
+                        resolve(point);
+                    } else {
+                        reject(point);
+                    }
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    async function geoCodeTheLocation(loc) {
+        try {
+            let point = await getPointWrapper(loc);
+            return point;
+        } catch (err) {
+            return err;
+        }
+    }
+
+    // i. Check the Location Language
+
+    let geoCode_OfGivenLocation;
+
+    if (givenLocation) {
+        const sanitized = sanitizeInput(givenLocation);
+        chinese = isChinese(sanitized);
+        is_English = isEnglish(sanitized);
+
+        if (chinese) {
+            console.log("Deepa");
+
+            geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
+            let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+            console.log(re);
+
+            let validated = validateGeocode(geoCode_OfGivenLocation);
+            if (validated.status === "LOW_CONFIDENCE") {
+                return { suggestions: geo.matches };
+            }
+        }
+        else if (isEnglish(sanitized)) {
+            var req_data = {
+                "arguments": JSON.stringify({
+                    "location": givenLocation
+                })
+            };
+
+            let func_name = "attendanceforcrmmeetings__getlocation";
+            let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+            console.log(zohoMapsResponse);
+            if (zohoMapsResponse.details.output != "") {
+                let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
+                geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
+                let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+            }
+
+        }
+    }
+console.log("A");
+
+    if (navigator.geolocation) {
+        console.log("B");
+        
+        navigator.geolocation.getCurrentPosition(async function (position) {
+            try {
+                if (currentStateOfDistanceRestriction == "false") {
+                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                }
+                else if (!givenLocation) {
+                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                }
+                else {
+                    if (geoCode_OfGivenLocation !== null) {
+                        let distance = calculateDistance(position, geoCode_OfGivenLocation);
+                        if (distance <= (existingDistanceValue) * 1000) {
+                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                        }
+                        else {
+                            showToast(langObj["toast-location-not-in-boundry"], "red");
+                            btnBackToAction();
+                        }
+                    }
+                    else {
+                        showToast("Unable to Geocode!", "red");
+                        btnBackToAction();
+                    }
+
+                }
+            } catch (err) {
+                showToast(langObj["toast-unexpected-error"], "red");
+                btnBackToAction();
+            } finally {
+                checkOutBtn.disabled = false;
+            }
+        });
+    } else {
+        checkOutBtn.innerHTML = originalText;
+        showToast(langObj["toast-geolocation-not-supported"], "red");
+        btnBackToAction()
+    }
+}
 
 async function checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser) {
     // let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);

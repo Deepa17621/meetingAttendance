@@ -1,8 +1,10 @@
 // import { updateVariable, getVariables } from "../lib/script";
 
 let toggle = document.getElementById("toggle");
+let timeRestrictionToggle = document.querySelector("#time-restriction-toggle");
 let distance_restriction_flag = "attendanceforcrmmeetings__Distance_Restriction_Flag";
 let distance_value = "attendanceforcrmmeetings__Distance";
+let time_restriction_flag = "attendanceforcrmmeetings__TimeRestrictionOption";
 let connectorName = "attendanceforcrmmeetings";
 let currentUser, locale, locale_code, langObj;
 
@@ -22,14 +24,21 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
     showLoader();
     let distanceRestriction = await getVariables(distance_restriction_flag);
     let configured_distance = await getVariables(distance_value);
+    let ExistingTimeRestriction = await getVariables(time_restriction_flag);
     existingDistanceValue = configured_distance.details.output;
-    if (distanceRestriction.details.output) {
+
+    // Time Based Restriction to Check-out
+    timeRestrictionToggle.checked = (ExistingTimeRestriction.details.output == "true") ? true : false;
+
+    // Distance Based Restrictions to check-out
+    toggle.checked = (distanceRestriction.details.output == "true") ? true : false;
+
+    if (distanceRestriction.details.output == "true") {
         document.querySelector(".SETTINGS_configure_distance").classList.remove("hidden");
         document.querySelector("#distanceValue").textContent = configured_distance.details.output + "km";
     }
     else {
         document.querySelector(".SETTINGS_configure_distance").classList.add("hidden");
-        document.querySelector("#distance-edit-wrapper").classList.add("hidden");
     }
     try {
         await new Promise(r => setTimeout(r, 150));
@@ -58,7 +67,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
     }
     hideLoader();
-    toggle.checked = (distanceRestriction.details.output == "true") ? true : false;
 
     toggle.addEventListener("change", async () => {
         let currentState = toggle.checked;
@@ -76,7 +84,17 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             showToast(langObj["toast-distance-restriction-disable"], "red");
         }
     });
-    hideLoader();
+
+    timeRestrictionToggle.addEventListener("click", async(e)=>{
+        let timeRestrictionFlag = timeRestrictionToggle.checked;
+        let d = await updateVariable(timeRestrictionFlag ? true : false, time_restriction_flag);
+        if(d.status_code == 200 && timeRestrictionFlag){
+            showToast(langObj["toast-time-restriction-enable"], "green");
+        }
+        else{
+            showToast(langObj["toast-time-restriction-disable"], "red");
+        }
+    })
 });
 
 document.querySelector(".distance-save").addEventListener("click", async (e) => {

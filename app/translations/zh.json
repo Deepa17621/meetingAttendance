@@ -9,6 +9,7 @@
   "button-success": "已签退",
   "button-pending": "立即签退",
   "status-loading": "加载中...",
+
   "toast-checkout-success": "已成功签退！",
   "toast-details-update-failed": "无法更新签退详情。请重试。",
   "toast-reverse-geocode-failed": "📍 无法反向定位地址。",
@@ -21,14 +22,19 @@
   "toast-error-contact-support": "发生意外错误。请联系支持。",
   "toast-distance-restriction-enable":"距离限制已启用！",
   "toast-distance-restriction-disable": "距离限制已禁用！",
+  "toast-time-restriction-enable": "已启用时间限制！",
+  "toast-time-restriction-disable": "已禁用时间限制!",
   "toast-distance-updated": "距离值已更新",
+
   "i-banner-content-row1":"定位精度可能会有所不同",
   "i-banner-content-row2":"请确保位置信息准确无误。",
+
   "detail-title": "会议标题",
   "detail-time": "会议时间",
   "detail-venue": "会议地点",
   "detail-InTime": "签到时间",
   "detail-OutTime": "签退时间",
+
   "progress-check-In": "签到",
   "progress-check-Out": "签退",
   "progress-in-Meeting": "会议中",
@@ -38,10 +44,16 @@
   "btn-check-out-now": "立即签退" ,
   "AM":"上午",
   "PM":"下午",
+
   "SETTINGS_heading": "关于",
   "SETTINGS_row1_content": "此扩展允许用户在 Web CRM 和移动 CRM 中从 CRM 会议中签出。签出详情会通过自定义字段安全地记录在会议记录中。",
   "SETTINGS_row2_content": "可以从会议列表视图或会议详情页面进行签出。需要通过移动 CRM 进行有效签到，并且只有在会议结束时间之后才能签出。",
   "SETTINGS_NOTE_heading": "基于位置的结账限制",
   "SETTINGS_NOTE_row1": "为了获得最佳效果，请确保提供准确的位置信息。",
-  "SETTINGS_NOTE_row2": "在某些情况下，位置信息可能是大概的，这可能会影响基于距离的验证。"
+  "SETTINGS_NOTE_row2": "在某些情况下，位置信息可能是大概的，这可能会影响基于距离的验证。",
+  "SETTINGS_Configure_Label": "配置距离限制（公里）",
+
+  "SETTINGS_Time_NOTE_row1": "用户可以启用或禁用基于时间的签出限制。",
+  "SETTINGS_Time_NOTE_row2": "此设置用于控制是否允许用户在会议结束时间之前签出。",
+  "SETTINGS_Time_NOTE_heading": "基于时间的签出限制"
 }

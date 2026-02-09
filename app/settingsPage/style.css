@@ -12,7 +12,7 @@
 }
 
 body {
-    height: 90vh;
+    height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
     background: var(--page-bg);
@@ -20,7 +20,7 @@ body {
     display: flex;
     /* align-items: center; */
     justify-content: center;
-    padding: 12px;
+    padding: 12px 8px 0 8px;
 }
 
 /* Loader overlay */
@@ -65,7 +65,7 @@ header {
 
 main {
     font-size: 15px;
-    height: 80%;
+    height: 100%;
     line-height: 1.7;
     display: flex;
     flex-direction: column;
@@ -92,9 +92,14 @@ main {
     width: 65%;
     /* margin: auto; */
     font-size: 14px;
-    height: 330px;
+    height: 175px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
-
+.note-wrapper{
+    display: flex;
+    justify-content: space-between;
+}
 .location-note-hdr {
     display: flex;
     align-items: center;
@@ -223,6 +228,8 @@ main {
 
 .distance-save {
     color: rgb(8, 212, 86);
+    margin-right: 0.5rem;
+    padding: 4px;
 }
 
 .distance-cancel {
