@@ -1,7 +1,12 @@
+// import { updateVariable, getVariables } from "../lib/script";
+
 let toggle = document.getElementById("toggle");
-let variableName = "attendanceforcrmmeetings__Distance_Restriction_Flag";
+let distance_restriction_flag = "attendanceforcrmmeetings__Distance_Restriction_Flag";
+let distance_value = "attendanceforcrmmeetings__Distance";
 let connectorName = "attendanceforcrmmeetings";
 let currentUser, locale, locale_code, langObj;
+
+let existingDistanceValue;
 
 // Elements
 let SETTINGS_heading = document.querySelector("#SETTINGS_heading");
@@ -11,20 +16,27 @@ let SETTINGS_NOTE_heading = document.querySelector("#SETTINGS_NOTE_heading");
 let SETTINGS_NOTE_row1 = document.querySelector("#SETTINGS_NOTE_row1");
 let SETTINGS_NOTE_row2 = document.querySelector("#SETTINGS_NOTE_row2");
 
-let elementsArray = [SETTINGS_heading, SETTINGS_row1_content, SETTINGS_row2_content, SETTINGS_NOTE_heading, SETTINGS_NOTE_row1, SETTINGS_NOTE_row2 ]
+let elementsArray = [SETTINGS_heading, SETTINGS_row1_content, SETTINGS_row2_content, SETTINGS_NOTE_heading, SETTINGS_NOTE_row1, SETTINGS_NOTE_row2]
 
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
     showLoader();
-    let distanceRestriction = await getVariables();
+    let distanceRestriction = await getVariables(distance_restriction_flag);
+    let configured_distance = await getVariables(distance_value);
+    existingDistanceValue = configured_distance.details.output;
+    if (distanceRestriction.details.output) {
+        document.querySelector(".SETTINGS_configure_distance").classList.remove("hidden");
+        document.querySelector("#distanceValue").textContent = configured_distance.details.output + "km";
+    }
+    else {
+        document.querySelector(".SETTINGS_configure_distance").classList.add("hidden");
+        document.querySelector("#distance-edit-wrapper").classList.add("hidden");
+    }
     try {
         await new Promise(r => setTimeout(r, 150));
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
         locale = await currentUser.users[0].locale;
         locale_code = await currentUser.users[0].locale_code;
-        console.log(locale);
-        console.log(locale_code);
-        
 
         if (locale_code.startsWith("en")) {
             let res = await fetch("../translations/en.json");
@@ -34,54 +46,104 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
             let res = await fetch("../translations/zh.json");
             langObj = await res.json();
         }
-        console.log(langObj);
-        
+
         if (langObj) {
             elementsArray.forEach(ele => {
                 ele.textContent = langObj[ele.id];
-                console.log(ele.textContent);
-                
+
             });
         }
-         hideLoader();
+        hideLoader();
     } catch (error) {
 
     }
-     hideLoader();
+    hideLoader();
     toggle.checked = (distanceRestriction.details.output == "true") ? true : false;
 
     toggle.addEventListener("change", async () => {
         let currentState = toggle.checked;
-        let d = await updateState(currentState ? true : false);
+        if (!currentState) {
+            document.querySelector(".SETTINGS_configure_distance").classList.add("hidden");
+        }
+        else {
+            document.querySelector(".SETTINGS_configure_distance").classList.remove("hidden");
+        }
+        let d = await updateVariable(currentState ? true : false, distance_restriction_flag);
+        if(d.status_code == 200 && currentState){
+            showToast(langObj["toast-distance-restriction-enable"], "green");
+        }
+        else{
+            showToast(langObj["toast-distance-restriction-disable"], "red");
+        }
     });
     hideLoader();
 });
 
-async function updateState(currentState) {
+document.querySelector(".distance-save").addEventListener("click", async (e) => {
+    e.preventDefault();
+    let distance = document.querySelector("#distance").value;
+    if (!distance) {
+        showToast("Please configure distance to save", "red");
+        return;
+    }
+    else {
+        let updateVariableRes = await updateVariable(distance, distance_value);
+        let updatedValue = JSON.parse(updateVariableRes.response);
+
+        if (updateVariableRes.status_code == 200) {
+            showToast(langObj["toast-distance-updated"], "green");
+            document.querySelector(".view-mode-wrapper").classList.remove("hidden");
+            document.querySelector(".distance-edit-wrapper").classList.add("hidden");
+            document.querySelector("#distanceValue").textContent = updatedValue["attendanceforcrmmeetings__Distance"];
+            existingDistanceValue = updatedValue["attendanceforcrmmeetings__Distance"];
+        }
+    }
+
+});
+document.querySelector(".distance-cancel").addEventListener("click", async (e) => {
+    e.preventDefault();
+    document.querySelector(".view-mode-wrapper").classList.remove("hidden");
+    document.querySelector(".distance-edit-wrapper").classList.add("hidden");
+});
+
+document.querySelector(".distance-edit").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.querySelector(".distance-edit-wrapper").classList.remove("hidden");
+    document.querySelector(".view-mode-wrapper").classList.add("hidden");
+    document.querySelector("#distance").value = existingDistanceValue;
+})
+
+async function getVariables(fieldName) {
+    var req_data = {
+        "arguments": JSON.stringify({
+            "fieldName": fieldName,
+        })
+    };
+    let func_name = "attendanceforcrmmeetings__getdistancerestrictionflag";
+    let variableRes = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+    return variableRes
+}
+
+async function updateVariable(fieldValue, fieldAPIName) {
     try {
         var req_data = {
             "arguments": JSON.stringify({
-                "current_state": currentState
+                "value": fieldValue,
+                "fieldName": fieldAPIName
             })
         };
         let func_name = "attendanceforcrmmeetings__updatevariable";
-        let updateCurrentState = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
-        if (updateCurrentState.status_code == 200) {
-            showToast(langObj["toast-distance-restriction-enable"], "green");
-            return updateCurrentState;
+        let updateCustomVariable = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+        let res = await JSON.parse(updateCustomVariable.details.output);
+        if (res.status_code == 200) {
+            return res;
         }
     } catch (error) {
-
+        return error;
     }
 
 }
-async function getVariables() {
-    var req_data = {};
-    let func_name = "attendanceforcrmmeetings__getdistancerestrictionflag";
-    currentStateOfDistanceRestriction = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
-    return currentStateOfDistanceRestriction
-}
-
+let activeToast = null;
 function showToast(message, color) {
     // Remove previous toast if still visible
     if (activeToast) {

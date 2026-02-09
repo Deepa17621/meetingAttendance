@@ -22,6 +22,7 @@ body {
     justify-content: center;
     padding: 12px;
 }
+
 /* Loader overlay */
 #loader {
     position: fixed;
@@ -43,6 +44,7 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
+
 .page {
     width: 100%;
     max-width: 1200px;
@@ -90,6 +92,7 @@ main {
     width: 65%;
     /* margin: auto; */
     font-size: 14px;
+    height: 330px;
 }
 
 .location-note-hdr {
@@ -184,6 +187,60 @@ main {
 .toggle input:checked+.slider::before {
     transform: translateX(24px);
 }
+
+#distance {
+    width: 200px;
+    border: 0.5px solid grey;
+    border-radius: 5px;
+    padding: 0.3rem;
+    cursor: pointer;
+}
+
+.SETTINGS_configure_distance {
+
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* background-color: red; */
+}
+
+.SETTINGS_configure_distance.hidden {
+    display: none;
+}
+
+.distance-label {
+    font-weight: 600;
+}
+
+.distance-save,
+.distance-cancel {
+    border: 0.5px solid grey;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.distance-save {
+    color: rgb(8, 212, 86);
+}
+
+.distance-cancel {
+    color: red;
+}
+
+.hidden {
+    display: none;
+}
+
+.distance-value {
+    font-weight: 500;
+}
+
+.icon {
+    cursor: pointer;
+}
+
 
 /* Responsive tweaks */
 @media (max-width: 768px) {

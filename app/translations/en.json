@@ -21,6 +21,7 @@
   "toast-error-contact-support":"Unexpected error. Contact support.",
   "toast-distance-restriction-enable":"Distance restriction enabled!",
   "toast-distance-restriction-disable": "Distance restriction disabled!",
+  "toast-distance-updated": "Distance value Updated",
   "i-banner-content-row1":"Location accuracy may vary",
   "i-banner-content-row2":"Please ensure accurate location details.",
   "detail-title":"Meeting Title",

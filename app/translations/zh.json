@@ -21,6 +21,7 @@
   "toast-error-contact-support": "发生意外错误。请联系支持。",
   "toast-distance-restriction-enable":"距离限制已启用！",
   "toast-distance-restriction-disable": "距离限制已禁用！",
+  "toast-distance-updated": "距离值已更新",
   "i-banner-content-row1":"定位精度可能会有所不同",
   "i-banner-content-row2":"请确保位置信息准确无误。",
   "detail-title": "会议标题",

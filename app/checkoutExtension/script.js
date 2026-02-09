@@ -15,6 +15,9 @@ let i_banner_content_row1 = document.querySelector("#i-banner-content-row1");
 let i_banner_content_row2 = document.querySelector("#i-banner-content-row2");
 
 let toastVisible = false;
+let distance_restriction_flag = "attendanceforcrmmeetings__Distance_Restriction_Flag";
+let distance_value = "attendanceforcrmmeetings__Distance";
+let existingDistanceValue;
 
 let detailsRow = document.querySelectorAll(".detail-row");
 detailsRow = [...detailsRow];
@@ -41,17 +44,8 @@ function dynamicContent(statusContent, btnContent, langObject, stage, status) {
     checkOutBtn.id = btnContent;
     checkOutBtn.textContent = langObject[btnContent];
 
-    // Reset old classes
-    meetingStatus.className = "";
-    checkOutBtn.className = "";
-
     meetingStatus.classList.add(status);
     checkOutBtn.classList.add(status);
-
-    // Reset progress states
-    activeProgressCircle.className = "";
-    pendingProgressCircle.className = "";
-    successProgressCircle.className = "";
 
     if (stage === "Check-out-success") {
         activeProgressCircle.classList.add("success");
@@ -109,11 +103,10 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
 
-        var req_data = {};
-
-        let func_name = "attendanceforcrmmeetings__getdistancerestrictionflag";
-
-        let distanceFlag = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+        let distanceFlag = await getVariables(distance_restriction_flag);
+        let configured_distance = await getVariables(distance_value);
+        existingDistanceValue = configured_distance.details.output;
+        
         currentStateOfDistanceRestriction = distanceFlag.details.output;
 
         locale = await currentUser.users[0].locale;
@@ -272,8 +265,12 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                 is_English = isEnglish(sanitized);
 
                 if (chinese) {
+                    console.log("Deepa");
+
                     geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
                     let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+                    console.log(re);
+
                     let validated = validateGeocode(geoCode_OfGivenLocation);
                     if (validated.status === "LOW_CONFIDENCE") {
                         return { suggestions: geo.matches };
@@ -288,7 +285,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
                     let func_name = "attendanceforcrmmeetings__getlocation";
                     let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
-
+                    console.log(zohoMapsResponse);
                     if (zohoMapsResponse.details.output != "") {
                         let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
                         geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
@@ -310,7 +307,7 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
                         else {
                             if (geoCode_OfGivenLocation !== null) {
                                 let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                                if (distance <= 2000) {
+                                if (distance <= (existingDistanceValue)*1000) {
                                     await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                                 }
                                 else {
@@ -465,6 +462,8 @@ function formatDateRange(start, end) {
 }
 
 async function updateMeetingRecord(location, time, currentRecord, position, durationTime, currentUser) {
+    console.log(location);
+
 
     // let locationObjectKeys = Object.keys(location.address ? location.address : location.label);
     // console.log(locationObjectKeys);
@@ -545,7 +544,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
-    let notesContent = "Checked Out @" + fullAddress;
+    let notesContent = "Checked Out @" + (fullAddress ? fullAddress : "-");
 
     var notesConfig = {
         Entity: "Notes",
@@ -686,6 +685,37 @@ function validateGeocode(result) {
     }
 
     return { status: "VALID", result };
+}
+
+async function getVariables(fieldName) {
+    var req_data = {
+        "arguments": JSON.stringify({
+            "fieldName": fieldName,
+        })
+    };
+    let func_name = "attendanceforcrmmeetings__getdistancerestrictionflag";
+    let variableRes = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+    return variableRes
+}
+
+async function updateVariable(fieldValue, fieldAPIName) {
+    try {
+        var req_data = {
+            "arguments": JSON.stringify({
+                "value": fieldValue,
+                "fieldName": fieldAPIName
+            })
+        };
+        let func_name = "attendanceforcrmmeetings__updatevariable";
+        let updateCustomVariable = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+        let res = await JSON.parse(updateCustomVariable.details.output);
+        if (res.status_code == 200) {
+            return res;
+        }
+    } catch (error) {
+        return error;
+    }
+
 }
 
 function showToast(message, color) {
