@@ -52,13 +52,11 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
         locale = await currentUser.users[0].locale;
-        locale_code = await currentUser.users[0].locale_code;
-
-        if (locale_code.startsWith("en")) {
+        if (locale.startsWith("en")) {
             let res = await fetch("../translations/en.json");
             langObj = await res.json();
         }
-        else if (locale_code.startsWith("zh")) {
+        else if (locale.startsWith("zh")) {
             let res = await fetch("../translations/zh.json");
             langObj = await res.json();
         }
@@ -66,7 +64,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         if (langObj) {
             elementsArray.forEach(ele => {
                 ele.textContent = langObj[ele.id];
-
             });
         }
         hideLoader();

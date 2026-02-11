@@ -115,11 +115,11 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         locale = await currentUser.users[0].locale;
         locale_code = await currentUser.users[0].locale_code;
 
-        if (locale_code.startsWith("en")) {
+        if (locale.startsWith("en")) {
             let res = await fetch("../translations/en.json");
             langObj = await res.json();
         }
-        else if (locale_code.startsWith("zh")) {
+        else if (locale.startsWith("zh")) {
             let res = await fetch("../translations/zh.json");
             langObj = await res.json();
         }
@@ -308,12 +308,8 @@ async function mainFunction(currentDate, endingTime, data) {
         is_English = isEnglish(sanitized);
 
         if (chinese) {
-            console.log("Deepa");
-
             geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
             let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
-            console.log(re);
-
             let validated = validateGeocode(geoCode_OfGivenLocation);
             if (validated.status === "LOW_CONFIDENCE") {
                 return { suggestions: geo.matches };
@@ -328,7 +324,6 @@ async function mainFunction(currentDate, endingTime, data) {
 
             let func_name = "attendanceforcrmmeetings__getlocation";
             let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
-            console.log(zohoMapsResponse);
             if (zohoMapsResponse.details.output != "") {
                 let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
                 geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
@@ -337,11 +332,8 @@ async function mainFunction(currentDate, endingTime, data) {
 
         }
     }
-console.log("A");
 
     if (navigator.geolocation) {
-        console.log("B");
-        
         navigator.geolocation.getCurrentPosition(async function (position) {
             try {
                 if (currentStateOfDistanceRestriction == "false") {
@@ -401,7 +393,6 @@ async function checkOutProcess(position, formattedCheckOutTime, data, duration, 
         let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
         reverseLocation = JSON.parse(zohoMapsResponse.details.output);
     }
-
     if (reverseLocation !== null) {
         let updateRecord = await updateMeetingRecord(reverseLocation, formattedCheckOutTime, data, position, duration, currentUser);
         meetingStatus.classList.add("success");
@@ -477,9 +468,6 @@ function formatDateRange(start, end) {
 }
 
 async function updateMeetingRecord(location, time, currentRecord, position, durationTime, currentUser) {
-    console.log(location);
-
-
     // let locationObjectKeys = Object.keys(location.address ? location.address : location.label);
     // console.log(locationObjectKeys);
 
@@ -559,7 +547,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
-    let notesContent = "Checked Out @" + (fullAddress ? fullAddress : "-");
+    let notesContent = fullAddress? "Checked Out @" +fullAddress : "Checked Out at " + time;
 
     var notesConfig = {
         Entity: "Notes",
