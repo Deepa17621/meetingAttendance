@@ -231,12 +231,18 @@ main {
     border-radius: 50%;
     padding: 5px;
     cursor: pointer;
+    /* font-size: small; */
 }
+
 
 .distance-save {
     color: rgb(8, 212, 86);
     margin-right: 0.5rem;
-    padding: 4px;
+    padding-left: 6px;
+    margin-left: 4px;
+    padding-bottom: 5px;
+    padding-top: 6px;
+    padding-right: 2px;
 }
 
 .distance-cancel {

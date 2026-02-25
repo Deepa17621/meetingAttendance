@@ -82,10 +82,10 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         }
         let d = await updateVariable(currentState ? true : false, distance_restriction_flag);
         if(d.status_code == 200 && currentState){
-            showToast(langObj["toast-distance-restriction-enable"], "green");
+            showToast(langObj["toast-distance-restriction-enable"], "rgb(30, 137, 230)");
         }
         else{
-            showToast(langObj["toast-distance-restriction-disable"], "red");
+            showToast(langObj["toast-distance-restriction-disable"], "rgb(30, 137, 230)");
         }
     });
 
@@ -93,10 +93,10 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
         let timeRestrictionFlag = timeRestrictionToggle.checked;
         let d = await updateVariable(timeRestrictionFlag ? true : false, time_restriction_flag);
         if(d.status_code == 200 && timeRestrictionFlag){
-            showToast(langObj["toast-time-restriction-enable"], "green");
+            showToast(langObj["toast-time-restriction-enable"], "rgb(30, 137, 230)");
         }
         else{
-            showToast(langObj["toast-time-restriction-disable"], "red");
+            showToast(langObj["toast-time-restriction-disable"], "rgb(30, 137, 230)");
         }
     })
 });
@@ -117,7 +117,7 @@ document.querySelector(".distance-save").addEventListener("click", async (e) => 
         return;
     }
     else {
-        let updateVariableRes = await updateVariable(distance, distance_value);
+        let updateVariableRes = await updateVariable(Number(distance), distance_value);
         let updatedValue = JSON.parse(updateVariableRes.response);
 
         if (updateVariableRes.status_code == 200) {

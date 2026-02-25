@@ -146,6 +146,8 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
         orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
+        console.log(meetingDetails);
+        
 
         checkInStatus = meetingDetails.data[0].Check_In_Status;
         checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
@@ -547,7 +549,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
     // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
 
-    let notesContent = fullAddress? "Checked Out @" +fullAddress : "Checked Out at " + time;
+    let notesContent = fullAddress ? "Checked Out @" + fullAddress : "Checked Out at " + time;
 
     var notesConfig = {
         Entity: "Notes",
