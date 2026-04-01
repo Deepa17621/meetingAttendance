@@ -64,15 +64,18 @@ function dynamicContent(statusContent, btnContent, langObject, stage, status) {
 }
 
 function calculateDistance(currentLocation, targetLocation) {
-    let lat1 = currentLocation.coords.latitude;
-    let lon1 = currentLocation.coords.longitude;
+    // console.log(currentLocation);
+    // console.log(targetLocation);
+    
+    let lat1 = chinese ? currentLocation.lat : currentLocation.coords.latitude;
+    let lon1 = chinese ? currentLocation.lng : currentLocation.coords.longitude;
     // targetLocation = JSON.parse(targetLocation);
 
     // let lat2 = targetLocation.latitude;
     // let lon2 = targetLocation.longitude;
 
     let lat2 = targetLocation.lat;
-    let lon2 = targetLocation.lng;
+    let lon2 = chinese ? targetLocation.lng : targetLocation.lon;
 
     const R = 6371e3; // meters
     const DEG_TO_RAD = Math.PI / 180;
@@ -146,8 +149,6 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
 
         meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
         orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
-        console.log(meetingDetails);
-        
 
         checkInStatus = meetingDetails.data[0].Check_In_Status;
         checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
@@ -241,6 +242,75 @@ ZOHO.embeddedApp.on("PageLoad", async function (data) {
     // }
 });
 
+// HERE - Map api for both forward and reverse geocode
+// HERE Maps - Reverse Geocoding
+async function reverseGeocodeHERE(lat, lng) {
+    try {
+        const response = await fetch(
+            `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${lng}&apiKey=YOUR_HERE_API_KEY`
+        );
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+            return data.items[0];
+        } else {
+            throw new Error('No results found');
+        }
+    } catch (error) {
+        console.error('HERE reverse geocoding failed:', error.message);
+        throw error;
+    }
+}
+
+// Baidu - Reverse Geocoding
+async function reverseGeocodeBaidu(point) {
+    return new Promise((resolve, reject) => {
+        const geocoder = new BMapGL.Geocoder();
+
+        geocoder.getLocation(point, function(result) {
+            if (result) {
+                resolve(result);
+            } else {
+                reject(new Error('Baidu reverse geocoding failed'));
+            }
+        });
+    });
+}
+
+// HERE Maps - Forward Geocoding
+async function forwardGeocodeHERE(address) {
+    try {
+        const response = await fetch(
+            `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(address)}&apiKey=YOUR_HERE_API_KEY`
+        );
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+            const { lat, lon } = data.items[0].position;
+            return { lat, lon };
+        } else {
+            throw new Error('No results found');
+        }
+    } catch (error) {
+        console.error('HERE forward geocoding failed:', error.message);
+        throw error;
+    }
+}
+
+// Baidu - Forward Geocoding
+async function forwardGeocodeBaidu(address) {
+    return new Promise((resolve, reject) => {
+        const geocoder = new BMapGL.Geocoder();
+
+        geocoder.getPoint(address, function(point) {
+            if (point) {
+                resolve(point);
+            } else {
+                reject(new Error('Baidu forward geocoding failed'));
+            }
+        }, 'China');
+    });
+}
 
 async function mainFunction(currentDate, endingTime, data) {
     const originalText = checkOutBtn.innerHTML;
@@ -302,7 +372,7 @@ async function mainFunction(currentDate, endingTime, data) {
 
     // i. Check the Location Language
 
-    let geoCode_OfGivenLocation;
+    let geoCode_OfGivenLocation, mapProvider;
 
     if (givenLocation) {
         const sanitized = sanitizeInput(givenLocation);
@@ -310,76 +380,116 @@ async function mainFunction(currentDate, endingTime, data) {
         is_English = isEnglish(sanitized);
 
         if (chinese) {
+            mapProvider = "BAIDU";
             geoCode_OfGivenLocation = await geoCodeTheLocation(givenLocation);
-            let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+            // let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
             let validated = validateGeocode(geoCode_OfGivenLocation);
             if (validated.status === "LOW_CONFIDENCE") {
                 return { suggestions: geo.matches };
             }
         }
         else if (isEnglish(sanitized)) {
+            mapProvider = "BROWSER_NAVIGATION";
+            // geoCode_OfGivenLocation = await forwardGeocodeHERE(givenLocation);
             var req_data = {
                 "arguments": JSON.stringify({
                     "location": givenLocation
                 })
             };
-
             let func_name = "attendanceforcrmmeetings__getlocation";
             let zohoMapsResponse = await ZOHO.CRM.FUNCTIONS.execute(func_name, req_data);
+            // console.log(zohoMapsResponse);
+            
             if (zohoMapsResponse.details.output != "") {
                 let parsedDATA = JSON.parse(zohoMapsResponse.details.output);
                 geoCode_OfGivenLocation = { "lat": parsedDATA.lat, "lon": parsedDATA.lon };
-                let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
+            //     // let re = await reverseLocBaiduResponse(geoCode_OfGivenLocation.lon, geoCode_OfGivenLocation.lat);
             }
 
         }
     }
+    getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
+}
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async function (position) {
-            try {
-                if (currentStateOfDistanceRestriction == "false") {
-                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                }
-                else if (!givenLocation) {
-                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                }
-                else {
-                    if (geoCode_OfGivenLocation !== null) {
-                        let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                        if (distance <= (existingDistanceValue) * 1000) {
-                            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
-                        }
-                        else {
-                            showToast(langObj["toast-location-not-in-boundry"], "red");
-                            btnBackToAction();
-                        }
+async function getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation) {
+    if (mapProvider == "BAIDU") {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                const geolocation = new BMapGL.Geolocation();
+                geolocation.getCurrentPosition(function(result) {
+                    if (this.getStatus() === BMAP_STATUS_SUCCESS) {
+                        resolve(result);
+                    } else {
+                        reject(new Error('Location failed: ' + this.getStatus()));
                     }
-                    else {
-                        showToast("Unable to Geocode!", "red");
-                        btnBackToAction();
-                    }
+                }, { enableHighAccuracy: true });
+            });
 
-                }
-            } catch (err) {
-                showToast(langObj["toast-unexpected-error"], "red");
-                btnBackToAction();
-            } finally {
-                checkOutBtn.disabled = false;
-            }
-        });
+            // result is available here — same as before
+            var point = result.point;
+            initiateCheckoutProcess(point, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
+
+        } catch (error) {
+            console.error('Baidu geolocation failed:', error.message);
+            checkOutBtn.innerHTML = originalText;
+            showToast(langObj["toast-geolocation-not-supported"], "red");
+            btnBackToAction();
+        }
+
     } else {
-        checkOutBtn.innerHTML = originalText;
-        showToast(langObj["toast-geolocation-not-supported"], "red");
-        btnBackToAction()
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async function(position) {
+                initiateCheckoutProcess(position, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
+            });
+        } else {
+            checkOutBtn.innerHTML = originalText;
+            showToast(langObj["toast-geolocation-not-supported"], "red");
+            btnBackToAction();
+        }
     }
 }
 
+async function initiateCheckoutProcess(position, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation) {
+    try {
+        if (currentStateOfDistanceRestriction == "false") {
+            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+        }
+        else if (!givenLocation) {
+            await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+        }
+        else {
+            if (geoCode_OfGivenLocation !== null) {
+                console.log(geoCode_OfGivenLocation);
+                
+                let distance = calculateDistance(position, geoCode_OfGivenLocation);
+                console.log(distance);
+                
+                if (distance <= (existingDistanceValue) * 1000) {
+                    await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
+                }
+                else {
+                    showToast(langObj["toast-location-not-in-boundry"], "red");
+                    btnBackToAction();
+                }
+            }
+            else {
+                showToast("Unable to Geocode!", "red");
+                btnBackToAction();
+            }
+
+        }
+    } catch (err) {
+        showToast(langObj["toast-unexpected-error"], "red");
+        btnBackToAction();
+    } finally {
+        checkOutBtn.disabled = false;
+    }
+}
 async function checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser) {
     // let reverseLocation = await reverseGeocode(position.coords.latitude, position.coords.longitude);
     let reverseLocation;
     if (chinese) {
-        reverseLocation = await reverseLocBaiduResponse(position.coords.longitude, position.coords.latitude);
+        reverseLocation = await reverseLocBaiduResponse(position.lng, position.lat);
     }
     else {
         var req_data = {
@@ -496,8 +606,8 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
                 attendanceforcrmmeetings__Checkout_Country: location.content.address_detail.country,
                 attendanceforcrmmeetings__Checkout_State: location.addressComponents.province,
                 attendanceforcrmmeetings__Checkout_Address: location.address,
-                attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
-                attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
+                attendanceforcrmmeetings__Checkout_Latitude: position.lat.toString(),
+                attendanceforcrmmeetings__Checkout_Longitude: position.lng.toString(),
                 attendanceforcrmmeetings__Checkout_Zipcode: location.address.postcode,
                 attendanceforcrmmeetings__Checkout_Time: time.toString(),
                 attendanceforcrmmeetings__Check_out_Sub_Locality: location.content.address_detail.town,
@@ -528,27 +638,7 @@ async function updateMeetingRecord(location, time, currentRecord, position, dura
             Trigger: ["workflow"],
         };
     }
-    // FIELDS FROM EXTENSION
-    // var extensionConfig = {
-    //     Entity: "Events",
-    //     APIData: {
-    //         id: currentRecord.EntityId[0],
-    //         attendanceforcrmmeetings__Checkout_City: location.addressComponents ? location.addressComponents.city : location.city,
-    //         attendanceforcrmmeetings__Checkout_Country: location.content.address_detail.country ? location.content.address_detail.country : location.country,
-    //         attendanceforcrmmeetings__Checkout_State: location.addressComponents.province ? location.addressComponents.province : location.state,
-    //         attendanceforcrmmeetings__Checkout_Address: location.address ? location.address : location.label,
-    //         attendanceforcrmmeetings__Checkout_Latitude: position.coords.latitude.toString(),
-    //         attendanceforcrmmeetings__Checkout_Longitude: position.coords.longitude.toString(),
-    //         attendanceforcrmmeetings__Checkout_Zipcode: location.address.postcode ? location.address.postcode : location.postal_code,
-    //         attendanceforcrmmeetings__Checkout_Time: time.toString(),
-    //         attendanceforcrmmeetings__Check_out_Sub_Locality: location.content?.address_detail?.town ? location.content.address_detail.town : location.address_line2,
-    //         attendanceforcrmmeetings__Meeting_Duration: durationTime,
-    //         attendanceforcrmmeetings__Checkout_By: currentUser.users[0].full_name,
-    //     },
-    //     Trigger: ["workflow"],
-    // };
     let res = await ZOHO.CRM.API.updateRecord(extensionConfig);
-
     let notesContent = fullAddress ? "Checked Out @" + fullAddress : "Checked Out at " + time;
 
     var notesConfig = {
