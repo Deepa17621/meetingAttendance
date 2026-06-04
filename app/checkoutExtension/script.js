@@ -29,10 +29,17 @@ let chinese, is_English;
 function showLoader() {
     const loader = document.getElementById("loader");
     if (loader) loader.style.display = "flex";
+    const content = document.querySelector(".wrapper");
+   
+    if (content) content.style.visibility = "hidden"; // hide content
 }
 
 function hideLoader() {
-    document.getElementById("loader").style.display = "none";
+    const content = document.querySelector(".wrapper");
+    if (content) content.style.visibility = "visible";
+    setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+    }, 3000); // matches transition duration
 }
 
 function dynamicContent(statusContent, btnContent, langObject, stage, status) {
@@ -99,88 +106,217 @@ let meetingDetails, currentUser, orgDetails, locale, locale_code, langObj, check
 
 // Page Load
 ZOHO.embeddedApp.on("PageLoad", async function (data) {
+    // showLoader();
+    // await new Promise(resolve => requestAnimationFrame(resolve));
+    // checkOutBtn.disabled = true;
+    // checkOutBtn.style.cursor = "not-allowed";
+    // try {
+        
+    //     // await new Promise(r => setTimeout(r, 300));
+        
+    //     currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
+
+    //     let distanceFlag = await getVariables(distance_restriction_flag);
+    //     let configured_distance = await getVariables(distance_value);
+    //     let ExistingTimeRestriction = await getVariables(time_restriction_flag);
+    //     ExistingTimeRestrictionFlag = ExistingTimeRestriction.details.output;
+    //     existingDistanceValue = configured_distance.details.output;
+
+    //     currentStateOfDistanceRestriction = distanceFlag.details.output;
+
+    //     locale = await currentUser.users[0].locale;
+    //     locale_code = await currentUser.users[0].locale_code;
+
+    //     if (locale.startsWith("en")) {
+    //         let res = await fetch("../translations/en.json");
+    //         langObj = await res.json();
+    //     }
+    //     else if (locale.startsWith("zh")) {
+    //         let res = await fetch("../translations/zh.json");
+    //         langObj = await res.json();
+    //     }
+    //     if (langObj) {
+    //         stageText.forEach(stage => {
+    //             stage.textContent = langObj[stage.id];
+    //         });
+    //         detailsRow.forEach(row => {
+    //             let firstTd = row.querySelector("td:first-child");
+    //             if (firstTd) {
+    //                 firstTd.textContent = langObj[firstTd.id];
+    //             }
+    //         });
+    //     }
+    //     i_banner_content_row1.textContent = langObj[i_banner_content_row1.id];
+    //     i_banner_content_row2.textContent = langObj[i_banner_content_row2.id];
+
+    //     // 1. Get Meeting Record Details
+    //     let meetingRecordConfig = {
+    //         Entity: "Events",
+    //         approved: "both",
+    //         RecordID: data.EntityId[0],
+    //     };
+
+    //     meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
+    //     orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
+
+    //     checkInStatus = meetingDetails.data[0].Check_In_Status;
+    //     checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
+    //     checkInTime = meetingDetails.data[0].Check_In_Time;
+
+    //     givenLocation = meetingDetails.data[0].Venue;
+    //     endTime = meetingDetails.data[0].End_DateTime;
+
+    //     meeting_title.textContent = meetingDetails.data[0].Event_Title;
+    //     meeting_time.textContent = formatDateRange(getTimeToDisplay(meetingDetails.data[0].Start_DateTime, orgDetails.org[0].time_zone), getTimeToDisplay(meetingDetails.data[0].End_DateTime, orgDetails.org[0].time_zone));
+    //     meeting_venue.textContent = givenLocation ? givenLocation : langObj["loc-not-specified"];
+    //     check_In_Time.textContent = checkInTime ? getTimeToDisplay(meetingDetails.data[0].Check_In_Time, orgDetails.org[0].time_zone) : langObj["yet-to-check-in"];
+    //     Check_Out_Time.textContent = checkOutTime ? getTimeToDisplay(checkOutTime, orgDetails.org[0].time_zone) : langObj["yet-to-check-out"];
+
+    //     if (checkInStatus === "VISITED" && !checkOutTime) {
+    //         activeProgressCircle.style.setProperty("--after-animation", "pulse 1.5s infinite");
+    //         activeProgressCircle.style.setProperty("--after-border", "1px solid #2563eb");
+    //         dynamicContent("actual-status-check-out-pending", "button-pending", langObj, "VISITED", "active");
+    //     }
+    //     else if (checkInStatus === "PLANNED") {
+    //         dynamicContent("actual-status-check-in-pending", "button-pending", langObj, "PLANNED", "pending");
+    //     }
+    //     else if (checkOutTime != null) {
+    //         checkOutBtn.classList.add("out");
+    //         dynamicContent("actual-status-already-done", "button-success", langObj, "Check-out-success", "success");
+    //     }
+    //     // hideLoader();
+    // } catch (error) {
+    //     console.log(error);
+    // }
+    // finally{
+       
+    //     hideLoader();
+    // }
+
     showLoader();
-    checkOutBtn.disabled = true;
-    checkOutBtn.style.cursor = "not-allowed";
-    try {
-        await new Promise(r => setTimeout(r, 150));
+// await new Promise(resolve => requestAnimationFrame(resolve));
+checkOutBtn.disabled = true;
+checkOutBtn.style.cursor = "not-allowed";
 
-        currentUser = await ZOHO.CRM.CONFIG.getCurrentUser();
+try {
+    // ✅ Run all independent API calls in parallel
+    [
+        currentUser,
+        distanceFlag,
+        configured_distance,
+        ExistingTimeRestriction
+    ] = await Promise.all([
+        ZOHO.CRM.CONFIG.getCurrentUser(),
+        getVariables(distance_restriction_flag),
+        getVariables(distance_value),
+        getVariables(time_restriction_flag)
+    ]);
 
-        let distanceFlag = await getVariables(distance_restriction_flag);
-        let configured_distance = await getVariables(distance_value);
-        let ExistingTimeRestriction = await getVariables(time_restriction_flag);
-        ExistingTimeRestrictionFlag = ExistingTimeRestriction.details.output;
-        existingDistanceValue = configured_distance.details.output;
+    // ✅ No need for await on plain object property access
+    ExistingTimeRestrictionFlag = ExistingTimeRestriction.details.output;
+    existingDistanceValue = configured_distance.details.output;
+    currentStateOfDistanceRestriction = distanceFlag.details.output;
+    locale = currentUser.users[0].locale;
+    locale_code = currentUser.users[0].locale_code;
 
-        currentStateOfDistanceRestriction = distanceFlag.details.output;
-
-        locale = await currentUser.users[0].locale;
-        locale_code = await currentUser.users[0].locale_code;
-
+    // ✅ Fetch translation in parallel with CRM calls below
+    const langFetchPromise = (async () => {
         if (locale.startsWith("en")) {
-            let res = await fetch("../translations/en.json");
-            langObj = await res.json();
+            const res = await fetch("../translations/en.json");
+            return res.json();
+        } else if (locale.startsWith("zh")) {
+            const res = await fetch("../translations/zh.json");
+            return res.json();
         }
-        else if (locale.startsWith("zh")) {
-            let res = await fetch("../translations/zh.json");
-            langObj = await res.json();
-        }
-        if (langObj) {
-            stageText.forEach(stage => {
-                stage.textContent = langObj[stage.id];
-            });
-            detailsRow.forEach(row => {
-                let firstTd = row.querySelector("td:first-child");
-                if (firstTd) {
-                    firstTd.textContent = langObj[firstTd.id];
-                }
-            });
-        }
-        i_banner_content_row1.textContent = langObj[i_banner_content_row1.id];
-        i_banner_content_row2.textContent = langObj[i_banner_content_row2.id];
+        return null;
+    })();
 
-        // 1. Get Meeting Record Details
-        let meetingRecordConfig = {
+    // ✅ Run meeting + org API calls in parallel with translation fetch
+    const [TRANSLATIONS, meetingRes, orgRes] = await Promise.all([
+        langFetchPromise,
+        ZOHO.CRM.API.getRecord({
             Entity: "Events",
             approved: "both",
             RecordID: data.EntityId[0],
-        };
-
-        meetingDetails = await ZOHO.CRM.API.getRecord(meetingRecordConfig);
-        orgDetails = await ZOHO.CRM.CONFIG.getOrgInfo();
-
-        checkInStatus = meetingDetails.data[0].Check_In_Status;
-        checkOutTime = meetingDetails.data[0].attendanceforcrmmeetings__Checkout_Time;
-        checkInTime = meetingDetails.data[0].Check_In_Time;
-
-        givenLocation = meetingDetails.data[0].Venue;
-        endTime = meetingDetails.data[0].End_DateTime;
-
-        meeting_title.textContent = meetingDetails.data[0].Event_Title;
-        meeting_time.textContent = formatDateRange(getTimeToDisplay(meetingDetails.data[0].Start_DateTime, orgDetails.org[0].time_zone), getTimeToDisplay(meetingDetails.data[0].End_DateTime, orgDetails.org[0].time_zone));
-        meeting_venue.textContent = givenLocation ? givenLocation : langObj["loc-not-specified"];
-        check_In_Time.textContent = checkInTime ? getTimeToDisplay(meetingDetails.data[0].Check_In_Time, orgDetails.org[0].time_zone) : langObj["yet-to-check-in"];
-        Check_Out_Time.textContent = checkOutTime ? getTimeToDisplay(checkOutTime, orgDetails.org[0].time_zone) : langObj["yet-to-check-out"];
-
-        if (checkInStatus === "VISITED" && !checkOutTime) {
-            activeProgressCircle.style.setProperty("--after-animation", "pulse 1.5s infinite");
-            activeProgressCircle.style.setProperty("--after-border", "1px solid #2563eb");
-            dynamicContent("actual-status-check-out-pending", "button-pending", langObj, "VISITED", "active");
-        }
-        else if (checkInStatus === "PLANNED") {
-            dynamicContent("actual-status-check-in-pending", "button-pending", langObj, "PLANNED", "pending");
-        }
-        else if (checkOutTime != null) {
-            checkOutBtn.classList.add("out");
-            dynamicContent("actual-status-already-done", "button-success", langObj, "Check-out-success", "success");
-        }
-        hideLoader();
-    } catch (error) {
-        console.log(error);
+        }),
+        ZOHO.CRM.CONFIG.getOrgInfo()
+    ]);
+langObj = TRANSLATIONS;
+    // ✅ Apply translations if available
+    if (langObj) {
+        stageText.forEach(stage => {
+            stage.textContent = langObj[stage.id];
+        });
+        detailsRow.forEach(row => {
+            const firstTd = row.querySelector("td:first-child");
+            if (firstTd) firstTd.textContent = langObj[firstTd.id];
+        });
+        i_banner_content_row1.textContent = langObj[i_banner_content_row1.id];
+        i_banner_content_row2.textContent = langObj[i_banner_content_row2.id];
     }
-    hideLoader();
+    // ✅ Destructure once — avoids repeated deep access
+    meetingDetails = meetingRes;
+    orgDetails = orgRes;
+    const meeting = meetingRes.data[0];
+    const tz = orgRes.org[0].time_zone;
+    
 
+    checkInStatus  = meeting.Check_In_Status;
+    checkOutTime   = meeting.attendanceforcrmmeetings__Checkout_Time;
+    checkInTime    = meeting.Check_In_Time;
+    givenLocation  = meeting.Venue;
+    endTime        = meeting.End_DateTime;
+
+    meeting_title.textContent  = meeting.Event_Title;
+    
+    meeting_time.textContent   = formatDateRange(getTimeToDisplay(meeting.Start_DateTime, tz),getTimeToDisplay(meeting.End_DateTime, tz));
+    
+    meeting_venue.textContent  = givenLocation ?? langObj?.["loc-not-specified"];
+    check_In_Time.textContent  = checkInTime
+        ? getTimeToDisplay(checkInTime, tz)
+        : langObj?.["yet-to-check-in"];
+    Check_Out_Time.textContent = checkOutTime
+        ? getTimeToDisplay(checkOutTime, tz)
+        : langObj?.["yet-to-check-out"];
+
+    // ✅ Status logic unchanged, just cleaner grouping
+    if (checkInStatus === "VISITED" && !checkOutTime) {
+        activeProgressCircle.style.setProperty("--after-animation", "pulse 1.5s infinite");
+        activeProgressCircle.style.setProperty("--after-border", "1px solid #2563eb");
+        dynamicContent("actual-status-check-out-pending", "button-pending", langObj, "VISITED", "active");
+    } else if (checkInStatus === "PLANNED") {
+        dynamicContent("actual-status-check-in-pending", "button-pending", langObj, "PLANNED", "pending");
+    } else if (checkOutTime != null) {
+        checkOutBtn.classList.add("out");
+        dynamicContent("actual-status-already-done", "button-success", langObj, "Check-out-success", "success");
+    }    
+
+} catch (error) {
+    console.error("Initialization failed:", error);
+    // e.g.: showErrorBanner(langObj?.["generic-error"] ?? "Something went wrong. Please try again.");
+} finally {
+    // document.body.getBoundingClientRect(); // flush layout
+
+    // await new Promise(resolve => {
+    //     requestAnimationFrame(() => {
+    //         requestAnimationFrame(() => {
+    //             // Final safety net: defer until browser is truly idle after paint
+    //             if ("requestIdleCallback" in window) {
+    //                 requestIdleCallback(resolve, { timeout: 500 });
+    //             } else {
+    //                 setTimeout(resolve, 1000); // minimal fallback, not 1700ms
+    //             }
+    //         });
+    //     });
+    // });
+
+    // await new Promise(resolve => requestAnimationFrame(resolve));
+    // await new Promise(resolve => requestAnimationFrame(resolve));
+
+    // setTimeout(()=>{hideLoader();}, 3000);
+    // checkOutBtn.disabled = false;
+    // checkOutBtn.style.cursor = "pointer";
+}
     // 2. Detect Platform - from Where Button is Accessed.
     // let detectPlatform = function detectPlatform() {
     //   const ua = navigator.userAgent.toLowerCase();
@@ -408,10 +544,11 @@ async function mainFunction(currentDate, endingTime, data) {
 
         }
     }
-    getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
+    getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation, originalText);
 }
 
-async function getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation) {
+async function getCoords(mapProvider, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation, originalText) {
+    // let originalTextOfButton = originalText;
     if (mapProvider == "BAIDU") {
         try {
             const result = await new Promise((resolve, reject) => {
@@ -419,8 +556,10 @@ async function getCoords(mapProvider, formattedCheckOutTime, data, duration, cur
                 geolocation.getCurrentPosition(function(result) {
                     if (this.getStatus() === BMAP_STATUS_SUCCESS) {
                         resolve(result);
-                    } else {
-                        reject(new Error('Location failed: ' + this.getStatus()));
+                    } else if (this.getStatus() === BMAP_STATUS_TIMEOUT) {
+                        reject(new Error(langObj["toast-location-request-timed-out"]));
+                    } else if (this.getStatus() === BMAP_STATUS_PERMISSION_DENIED) {
+                        reject(new Error(langObj["toast-location-access-denied"]));
                     }
                 }, { enableHighAccuracy: true });
             });
@@ -432,20 +571,54 @@ async function getCoords(mapProvider, formattedCheckOutTime, data, duration, cur
         } catch (error) {
             console.error('Baidu geolocation failed:', error.message);
             checkOutBtn.innerHTML = originalText;
-            showToast(langObj["toast-geolocation-not-supported"], "red");
+            showToast(error.message, "red");
             btnBackToAction();
         }
 
     } else {
+        // if (navigator.geolocation) {
+        //     navigator.geolocation.getCurrentPosition(async function(position) {
+        //         initiateCheckoutProcess(position, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
+        //     });
+        // } else {
+        //     checkOutBtn.innerHTML = originalText;
+        //     showToast(langObj["toast-geolocation-not-supported"], "red");
+        //     btnBackToAction();
+        // }
+
+        // ----
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async function(position) {
-                initiateCheckoutProcess(position, formattedCheckOutTime, data, duration, currentUser, geoCode_OfGivenLocation);
-            });
-        } else {
+    navigator.geolocation.getCurrentPosition(
+        async function(position) {
+            initiateCheckoutProcess(
+                position,
+                formattedCheckOutTime,
+                data,
+                duration,
+                currentUser,
+                geoCode_OfGivenLocation
+            );
+        },
+        function(error) {
             checkOutBtn.innerHTML = originalText;
-            showToast(langObj["toast-geolocation-not-supported"], "red");
             btnBackToAction();
+
+            if (error.code === error.PERMISSION_DENIED) {
+                showToast(langObj[ "toast-location-access-denied"], "red");
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                showToast(langObj["toast-location-unavailable"], "red");
+            } else if (error.code === error.TIMEOUT) {
+                showToast(langObj["toast-location-request-timed-out"], "red");
+            } else {
+                showToast(langObj["toast-location-unable-toFetch"], "red");
+            }
         }
+    );
+} else {
+    checkOutBtn.innerHTML = originalText;
+    showToast(langObj["toast-geolocation-not-supported"], "red");
+    btnBackToAction();
+}
     }
 }
 
@@ -459,11 +632,8 @@ async function initiateCheckoutProcess(position, formattedCheckOutTime, data, du
         }
         else {
             if (geoCode_OfGivenLocation !== null) {
-                console.log(geoCode_OfGivenLocation);
                 
                 let distance = calculateDistance(position, geoCode_OfGivenLocation);
-                console.log(distance);
-                
                 if (distance <= (existingDistanceValue) * 1000) {
                     await checkOutProcess(position, formattedCheckOutTime, data, duration, currentUser);
                 }
@@ -684,9 +854,9 @@ function getTimeToDisplay(isoString, locale) {
     const minute = parts.find(p => p.type === "minute").value;
     const day = parts.find(p => p.type === "day").value;
     const month = parts.find(p => p.type === "month").value;
-    const year = parts.find(p => p.type === "year").value;
-    const dayPeriod = parts.find(p => p.type === "dayPeriod").value.toUpperCase();
-
+    const year = parts.find(p => p.type === "year").value;    
+    const dayPeriod = parts.find(p=>p.type === "dayPeriod").value.toUpperCase();
+    
     return `${hour}:${minute} ${langObj[dayPeriod]}, ${day}-${month}-${year}`;
 }
 
@@ -842,4 +1012,34 @@ function btnBackToAction() {
     checkOutBtn.disabled = false;
     checkOutBtn.style.cursor = "pointer";
     checkOutBtn.textContent = langObj["btn-check-out-now"];
+}
+function hideLoaderAfterPaint(watchElement) {
+    return new Promise(resolve => {
+        // Element already has content — just wait for next paint
+        if (watchElement.textContent.trim() !== "") {
+            requestAnimationFrame(() => {
+                hideLoader();
+                resolve();
+            });
+            return;
+        }
+
+        // Wait for the element to receive content
+        const observer = new MutationObserver(() => {
+            observer.disconnect();
+            // Content is SET — now wait for browser to actually PAINT it
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    hideLoader();
+                    resolve();
+                });
+            });
+        });
+
+        observer.observe(watchElement, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+    });
 }

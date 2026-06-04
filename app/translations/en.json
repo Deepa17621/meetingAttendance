@@ -28,6 +28,10 @@
   "toast-distance-not-entered": "Please configure distance to save",
   "toast-distance-not-in-range": "Kindly enter a distance within the range of 1 to 10 km.",
   "toast-distance-decimal": "Please enter a whole number.",
+  "toast-location-access-denied": "Location access denied. Please enable location permission.",
+  "toast-location-unavailable":"Location information is unavailable.",
+  "toast-location-request-timed-out": "Location request timed out.",
+  "toast-location-unable-toFetch": "Unable to fetch location.",
 
   "i-banner-content-row1": "Location accuracy may vary",
   "i-banner-content-row2": "Please ensure accurate location details.",
