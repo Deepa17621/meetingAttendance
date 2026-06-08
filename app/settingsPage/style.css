@@ -18,17 +18,22 @@ body {
     background: var(--page-bg);
     color: var(--text-main);
     display: flex;
-    /* align-items: center; */
+    align-items: center;
     justify-content: center;
     padding: 12px;
-}
 
+    /* margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--page-bg);
+    color: var(--text-main);
+    padding: 12px; */
+}
 /* Loader overlay */
 #loader {
     position: fixed;
     inset: 0;
     /* shorthand for top:0; right:0; bottom:0; left:0 */
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.967);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -44,10 +49,17 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 .page {
     width: 100%;
     max-width: 1200px;
+     margin: 0 auto;
+     /* min-height: 300px; */
     background: var(--card-bg);
     border-radius: 6px;
     /* border: 1px solid var(--border-subtle); */
@@ -73,7 +85,7 @@ main {
     flex-direction: column;
     /* justify-content: space-around; */
     /* align-items: center; */
-    /* overflow-y: hidden; */
+    overflow-y: hidden;
     gap: 10px;
     padding-bottom: 10px;
 }
@@ -218,7 +230,9 @@ main {
 }
 
 .SETTINGS_configure_distance.hidden {
-    display: none;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
 }
 
 .distance-label {

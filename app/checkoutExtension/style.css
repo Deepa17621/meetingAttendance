@@ -212,6 +212,7 @@ body {
     border-radius: 6px;
     font-size: 13px;
     font-weight: 100;
+    left: -10px;
     min-width: 190px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     opacity: 0;
@@ -224,7 +225,7 @@ body {
     content: "";
     position: absolute;
     top: -6px;
-    left: 55%;
+    left: 60%;
     transform: translateX(-50%);
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;

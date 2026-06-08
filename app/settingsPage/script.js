@@ -145,6 +145,16 @@ document.querySelector(".distance-edit").addEventListener("click", (e) => {
     document.querySelector("#distance").value = existingDistanceValue;
 })
 
+document.querySelector("#distance").addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+        document.querySelector('.distance-save').click();
+    }
+
+    if (e.key === 'Escape') {
+        document.querySelector('.distance-cancel').click();
+    }
+});
+
 async function getVariables(fieldName) {
     var req_data = {
         "arguments": JSON.stringify({
